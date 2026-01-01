@@ -27,6 +27,13 @@ This repository provides a production-ready example of integrating Lazorkit SDK 
    - Session persistence across devices
    - Cross-tab synchronization
 
+   **Message Signing with Passkeys:**
+   
+   Sign messages securely using your passkey without any on-chain transactions:
+   
+   ![Message Signing Step 1](./assets/msg-signing-step-1.png)
+   ![Message Signing Step 2](./assets/msg-signing-step-2.png.png)
+
 2. **Gasless Transfers**
    - Send SOL without SOL for fees
    - Send USDC (or any SPL token) gaslessly
