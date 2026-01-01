@@ -19,6 +19,22 @@ import { useWalletStore } from "@/lib/store/walletStore";
 import { getLazorkitConfig } from "@/lib/config/lazorkit";
 import toast from "react-hot-toast";
 
+// Debounce utility to prevent too many rapid calls
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout | null = null;
+  return function executedFunction(...args: Parameters<T>) {
+    const later = () => {
+      timeout = null;
+      func(...args);
+    };
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
 export function useLazorkitWallet() {
   const lazorkitWalletHook = useWallet();
   const {
@@ -57,6 +73,9 @@ export function useLazorkitWallet() {
   const prevConnectingRef = useRef(lazorkitIsConnecting);
   const prevWalletRef = useRef(lazorkitWallet);
   const prevPubkeyRef = useRef(lazorkitSmartWalletPubkey?.toString());
+  const isFetchingBalanceRef = useRef(false);
+  const lastBalanceFetchRef = useRef(0);
+  const balanceErrorCountRef = useRef(0);
 
   // Initial sync on mount - ensure state is synced immediately after network switch
   useEffect(() => {
@@ -107,11 +126,27 @@ export function useLazorkitWallet() {
 
   /**
    * Fetch SOL balance for the connected wallet
+   * Includes debouncing and error handling to prevent too many requests
    */
   const fetchBalance = useCallback(async () => {
     // Use lazorkitWallet values directly to avoid circular dependency
     const address = lazorkitSmartWalletPubkey?.toString();
     if (!address) return;
+
+    // Prevent concurrent requests
+    if (isFetchingBalanceRef.current) {
+      return;
+    }
+
+    // Throttle: Don't fetch more than once every 3 seconds
+    const now = Date.now();
+    const timeSinceLastFetch = now - lastBalanceFetchRef.current;
+    if (timeSinceLastFetch < 3000) {
+      return;
+    }
+
+    isFetchingBalanceRef.current = true;
+    lastBalanceFetchRef.current = now;
 
     try {
       // Get fresh config based on current network
@@ -126,42 +161,82 @@ export function useLazorkitWallet() {
       const publicKey = new PublicKey(address);
       const balance = await connection.getBalance(publicKey);
       setBalance(balance / LAMPORTS_PER_SOL); // Convert lamports to SOL
+      balanceErrorCountRef.current = 0; // Reset error count on success
     } catch (error: any) {
       // Silently handle rate limiting (429) errors - they're expected with public RPCs
-      if (error?.message?.includes("429") || error?.status === 429) {
+      // Check multiple ways the error might be formatted
+      const errorMessage = error?.message || "";
+      const errorCode = error?.code || error?.error?.code;
+      const errorStatus = error?.status;
+      
+      if (
+        errorMessage.includes("429") ||
+        errorCode === 429 ||
+        errorStatus === 429 ||
+        errorMessage.includes("Too many requests")
+      ) {
         console.warn("RPC rate limited - balance update skipped");
         // Don't show error toast for rate limiting - it's expected behavior
+        // Don't increment error count for rate limits
         return;
       }
-      console.error("Failed to fetch balance:", error);
-      // Only show error for unexpected failures
-      if (!error?.message?.includes("429")) {
-        toast.error("Failed to fetch balance");
+      
+      // Handle "Failed to fetch" errors (network issues)
+      if (errorMessage.includes("Failed to fetch") || error?.name === "TypeError") {
+        console.warn("Network error while fetching balance:", error);
+        // Don't show error toast for network errors - they're temporary
+        // Don't increment error count for network errors
+        return;
       }
+      
+      console.error("Failed to fetch balance:", error);
+      
+      // Only show error toast occasionally (not for every failure)
+      // Show error every 5th failure to avoid spam
+      balanceErrorCountRef.current += 1;
+      if (balanceErrorCountRef.current % 5 === 0) {
+        toast.error("Failed to fetch balance. Check your connection.");
+      }
+    } finally {
+      isFetchingBalanceRef.current = false;
     }
   }, [lazorkitSmartWalletPubkey, setBalance, network]);
 
   // Fetch balance when wallet connects (use lazorkitWallet values directly)
+  // Use a debounced version to prevent too many rapid calls
+  const debouncedFetchBalanceRef = useRef(
+    debounce((address: string, currentNetwork: typeof network) => {
+      if (lazorkitIsConnected && address) {
+        fetchBalance();
+      }
+    }, 1000) // Debounce by 1 second
+  );
+
   useEffect(() => {
     if (lazorkitIsConnected && lazorkitSmartWalletPubkey) {
-      fetchBalance();
+      // Use debounced version to prevent rapid successive calls
+      const address = lazorkitSmartWalletPubkey.toString();
+      debouncedFetchBalanceRef.current(address, network);
     } else {
       setBalance(null);
+      balanceErrorCountRef.current = 0; // Reset error count on disconnect
     }
-  }, [lazorkitIsConnected, lazorkitSmartWalletPubkey, fetchBalance, setBalance]);
+    // Only depend on the actual values, not the function
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lazorkitIsConnected, lazorkitSmartWalletPubkey, network]);
 
   /**
    * Connect wallet with passkey authentication
    * This triggers the biometric prompt (Face ID/Touch ID/Fingerprint)
+   * 
+   * Note: According to Lazorkit docs, connect() only takes { feeMode } option.
+   * The rpcUrl, portalUrl, and paymasterConfig are set in LazorkitProvider.
    */
   const connect = async () => {
     try {
       setConnecting(true);
-      // Use network-specific config for connection
+      // Connect with feeMode only - config is set in LazorkitProvider
       const walletInfo = await lazorkitConnect({
-        rpcUrl: config.RPC_URL,
-        portalUrl: config.PORTAL_URL,
-        paymasterConfig: config.PAYMASTER,
         feeMode: "paymaster",
       });
       setWallet(walletInfo);

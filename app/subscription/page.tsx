@@ -89,6 +89,16 @@ export default function SubscriptionPage() {
   };
 
   const handleCharge = async (subscription: Subscription) => {
+    if (!isConnected) {
+      alert("Please connect your wallet first");
+      return;
+    }
+
+    if (!smartWalletAddress) {
+      alert("Wallet address not available. Please reconnect your wallet.");
+      return;
+    }
+
     if (!subscription.recipient) {
       alert("Recipient address not set");
       return;
@@ -119,8 +129,9 @@ export default function SubscriptionPage() {
             : sub
         )
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error("Charge failed:", error);
+      alert(error?.message || "Failed to charge subscription. Please check your wallet connection and recipient address.");
     }
   };
 

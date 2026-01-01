@@ -50,6 +50,9 @@ export const LAZORKIT_CONFIG = getLazorkitConfig("devnet");
 // Devnet USDC mint address (for testing gasless transfers)
 export const DEVNET_USDC_MINT = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU";
 
+// Mainnet USDC mint address
+export const MAINNET_USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+
 // Solana Explorer URLs
 export const EXPLORER_URLS = {
   devnet: "https://explorer.solana.com",
