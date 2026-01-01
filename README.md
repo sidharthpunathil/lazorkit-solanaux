@@ -1,413 +1,213 @@
-# Lazorkit Solana UX Examples
+# Lazorkit Solana UX
 
-> **A comprehensive Next.js starter template demonstrating passkey-powered, gasless Solana transactions**
+**Passkey-powered, gasless Solana dApp examples built with Next.js**
 
-Built for the [Lazorkit Bounty](https://earn.superteam.fun/listing/integrate-passkey-technology-with-lazorkit-to-10x-solana-ux) by Superteam Vietnam.
+A production-ready starter template showing how Lazorkit removes the friction from Solana UX — no seed phrases, no browser extensions, no SOL required for gas.
 
-**Live Demo**: [https://lazorkit-solanaux.vercel.app](https://lazorkit-solanaux.vercel.app) | **Documentation**: [https://lazorkit-solanaux.vercel.app/docs](https://lazorkit-solanaux.vercel.app/docs)
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://lazorkit-solanaux.vercel.app)
+[![Docs](https://img.shields.io/badge/docs-vitepress-informational)](https://lazorkit-solanaux.vercel.app/docs)
+[![Solana Devnet](https://img.shields.io/badge/Solana-Devnet-blueviolet)](https://explorer.solana.com/?cluster=devnet)
+[![LazorKit](https://img.shields.io/badge/LazorKit-v2.0.1-blue)](https://docs.lazorkit.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#license)
 
 ![Landing Page](./assets/landing-page.png)
 
-## Overview
+---
 
-This repository provides a production-ready example of integrating Lazorkit SDK with Next.js to create a Solana Web3 experience. It demonstrates:
+## Why Lazorkit?
 
-- **Passkey Authentication** - No seed phrases, no browser extensions
-- **Gasless Transactions** - Send tokens without holding SOL for fees
-- **Token Swaps** - Jupiter aggregator integration
-- **Subscription Billing** - Recurring payments with smart wallet delegation
+| Traditional Solana UX | With Lazorkit |
+|----------------------|---------------|
+| Seed phrases to manage | Face ID / Touch ID authentication |
+| Browser extensions required | Works directly in the browser |
+| Users must buy SOL for gas | Gasless transactions via paymaster |
+| Manual transaction signing | One-click approval |
+| Complex wallet setup | Smart wallet created on first login |
 
-> **Network**: All features work on **Solana Devnet** by default. This is perfect for testing and development. The configuration uses Devnet RPC endpoints, Devnet paymaster, and Devnet token mints. See the [Smart Wallet Guide in Docs](/docs/smart-wallet-guide) for details on funding your wallet with test SOL.
->
-> **Network Switcher**: You can switch between Devnet and Mainnet using the network toggle in the top-right corner of any page. The network setting persists across page refreshes and affects all operations (RPC endpoints, paymaster, token mints, and explorer links).
+---
 
-## Features
+## Examples
 
-### Core Features (Must-Have)
+| # | Example | Description | Docs |
+|---|---------|-------------|------|
+| 01 | [Passkey Login](app/passkey-login) | Biometric auth, smart wallet creation, message signing | [Tutorial](./tutorials/passkey-wallet.md) |
+| 02 | [Gasless Transfer](app/gasless-transfer) | Send SOL and SPL tokens without holding SOL | [Tutorial](./tutorials/gasless-tx.md) |
+| 03 | [Token Swap](app/token-swap) | Jupiter aggregator swaps with gasless execution | [Tutorial](./tutorials/token-swap.md) |
+| 04 | [Subscription](app/subscription) | Recurring payments via smart wallet delegation | [Tutorial](./tutorials/subscription.md) |
 
-1. **Passkey Login Flow**
-   - Biometric authentication (Face ID, Touch ID, Fingerprint)
-   - Automatic smart wallet creation
-   - Session persistence across devices
-   - Cross-tab synchronization
+<details>
+<summary><b>Screenshots</b></summary>
 
-   ![Passkey Authentication](./assets/passkey-auth.png)
-   
-   > **📚 Detailed Documentation**: See the [Passkey Authentication Tutorial](./tutorials/passkey-wallet.md) and [VitePress Docs](/docs/tutorials/passkey-wallet) for complete implementation guide with code examples.
+| Passkey Authentication | Gasless Transactions |
+|---|---|
+| ![Passkey Authentication](./assets/passkey-auth.png) | ![Gasless Transactions](./assets/gassles-txn.png) |
 
-   **Message Signing with Passkeys:**
-   
-   Sign messages securely using your passkey without any on-chain transactions:
-   
-   ![Message Signing Step 1](./assets/msg-signing-step-1.png)
-   ![Message Signing Step 2](./assets/msg-signing-step-2.png.png)
+| Token Swap | Subscription Service |
+|---|---|
+| ![Token Swap](./assets/token-swap.png) | ![Subscription Service](./assets/subscription-service.png) |
 
-2. **Gasless Transfers**
-   - Send SOL without SOL for fees
-   - Send USDC (or any SPL token) gaslessly
-   - Pay fees in USDC instead of SOL
-   - Perfect for onboarding new users
+| Message Signing — Step 1 | Message Signing — Step 2 |
+|---|---|
+| ![Message Signing Step 1](./assets/msg-signing-step-1.png) | ![Message Signing Step 2](./assets/msg-signing-step-2.png.png) |
 
-   ![Gasless Transactions](./assets/gassles-txn.png)
-   
-   > **📚 Detailed Documentation**: See the [Gasless Transactions Tutorial](./tutorials/gasless-tx.md) and [VitePress Docs](/docs/tutorials/gasless-tx) for complete implementation guide with code examples.
+| Documentation | Step-by-Step Guides |
+|---|---|
+| ![VitePress Documentation](./assets/docs.png) | ![Step-by-Step Guides](./assets/guides.png) |
 
-### Advanced Features
+</details>
 
-3. **Token Swap Interface**
-   - Latest Jupiter API integration (v1 with API key support)
-   - Best price routing across all DEXs
-   - Gasless swap execution
-   - Real-time quotes with slippage protection
-   - Multi-hop swaps with automatic route optimization
-
-   ![Token Swap](./assets/token-swap.png)
-   
-   > **📚 Detailed Documentation**: See the [Token Swap Tutorial](./tutorials/token-swap.md) and [VitePress Docs](/docs/tutorials/token-swap) for complete implementation guide with code examples.
-
-4. **Subscription Service**
-   - One-time approval for recurring charges
-   - Automated billing without user signatures
-   - Smart wallet policy delegation
-   - Cancel anytime
-
-   ![Subscription Service](./assets/subscription-service.png)
-   
-   > **📚 Detailed Documentation**: See the [Subscription Service Tutorial](./tutorials/subscription.md) and [VitePress Docs](/docs/tutorials/subscription) for complete implementation guide with code examples.
+---
 
 ## Quick Start
 
-> **Documentation**: Access VitePress documentation at `/docs` after building. The docs are built into the Next.js app and served as static files from `public/docs/`.
-
-### VitePress Documentation
-
-The project includes comprehensive VitePress documentation with interactive guides and examples. The documentation is accessible at `/docs` route:
-
-- **Local Development**: [http://localhost:3000/docs](http://localhost:3000/docs)
-- **Production**: [https://lazorkit-solanaux.vercel.app/docs](https://lazorkit-solanaux.vercel.app/docs)
-
-![VitePress Documentation](./assets/docs.png)
-
-> **New to Smart Wallets?** Check out [SMART_WALLET_GUIDE.md](./SMART_WALLET_GUIDE.md) or the [Smart Wallet Guide in Docs](/docs/smart-wallet-guide) to learn:
-> - What a smart wallet is and how it's created
-> - How to fund your wallet with Devnet SOL
-> - Understanding balances and network details
-
-### Prerequisites
-
-- Bun 1.0+ (recommended) or Node.js 18+
-- A modern browser with WebAuthn support (Chrome, Safari, Firefox, Edge)
-
-### Installation
-
-1. **Clone the repository**
+**Prerequisites:** Bun 1.0+ (or Node.js 18+) and a browser with WebAuthn support.
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/sidharthpunathil/lazorkit-solanaux.git
 cd lazorkit-solanaux
-```
-
-2. **Install dependencies**
-
-```bash
 bun install
-# or
-npm install
-```
-
-3. **Set up environment variables**
-
-Copy `.env.example` to `.env.local`:
-
-```bash
 cp .env.example .env.local
-```
-
-The default configuration works with Solana Devnet out of the box. No additional setup required!
-
-The `.env.example` file contains all available environment variables with their default values. You can customize them if needed:
-
-- `NEXT_PUBLIC_RPC_URL` - Solana RPC endpoint (default: Devnet)
-- `NEXT_PUBLIC_PORTAL_URL` - Lazorkit portal URL (usually don't need to change)
-- `NEXT_PUBLIC_PAYMASTER_URL` - Paymaster service URL (default: Devnet)
-- `NEXT_PUBLIC_PAYMASTER_API_KEY` - Optional API key for paymaster
-- `NEXT_PUBLIC_JUPITER_API_KEY` - **Required** Jupiter API key (get free key from [portal.jup.ag](https://portal.jup.ag))
-
-4. **Run the development server**
-
-4. **Build the documentation** (one-time setup or when docs change)
-
-```bash
-npm run docs:build
-```
-
-This builds the VitePress docs into `public/docs/` which Next.js serves automatically.
-
-5. **Run the development server**
-
-```bash
+bun run docs:build   # builds VitePress docs into public/docs/
 bun run dev
-# or
-npm run dev
 ```
 
-6. **Open your browser**
+Open [http://localhost:3000](http://localhost:3000) — docs at [/docs](http://localhost:3000/docs).
 
-- Main app: [http://localhost:3000](http://localhost:3000)
-- **VitePress Documentation**: [http://localhost:3000/docs](http://localhost:3000/docs) - Serves the built VitePress docs from `public/docs/`
+The defaults work against Solana Devnet out of the box. Only the Jupiter API key needs to be added for swaps.
 
-> **Note**: The VitePress docs are built into the Next.js app at `public/docs/` and served via the `/docs` route. You don't need a separate VitePress server. Just run `npm run docs:build` when you update the documentation, then restart your Next.js dev server.
-
-## Project Structure
-
-```
-lazorkit-solanaux/
-├── app/                    # Next.js App Router pages
-│   ├── page.tsx           # Home page (navigation hub)
-│   ├── passkey-login/     # Passkey authentication demo
-│   ├── gasless-transfer/  # Gasless token transfers
-│   ├── token-swap/        # Jupiter token swap interface
-│   └── subscription/       # Subscription billing demo
-├── components/             # Reusable React components
-│   ├── ConnectButton.tsx
-│   ├── WalletStatus.tsx
-│   ├── WalletInfo.tsx
-│   ├── TransferForm.tsx
-│   ├── SwapInterface.tsx
-│   └── ...                 # More reusable components
-├── lib/
-│   ├── config/            # Configuration files
-│   │   └── lazorkit.ts    # Lazorkit SDK configuration
-│   ├── hooks/             # Custom React hooks
-│   │   ├── useLazorkitWallet.ts    # Main wallet hook
-│   │   ├── useGaslessTransfer.ts   # Gasless transfer hook
-│   │   └── useTokenSwap.ts         # Token swap hook
-│   └── store/             # Zustand state management
-│       └── walletStore.ts # Wallet state store
-├── tutorials/             # Step-by-step tutorials
-│   ├── passkey-wallet.md
-│   ├── gasless-tx.md
-│   ├── token-swap.md
-│   └── subscription.md
-└── README.md
-```
-
-## Tutorials
-
-Detailed step-by-step guides are available in the `tutorials/` directory. These comprehensive guides walk you through each feature with code examples and best practices:
-
-![Step-by-Step Guides](./assets/guides.png)
-
-- **[Passkey Wallet Setup](./tutorials/passkey-wallet.md)** - Complete guide to implementing passkey authentication
-- **[Gasless Transactions](./tutorials/gasless-tx.md)** - How to send tokens without SOL for fees
-- **[Token Swaps](./tutorials/token-swap.md)** - Integrating Jupiter aggregator for token swaps
-- **[Subscription Service](./tutorials/subscription.md)** - Building recurring payment systems
-
-## Tech Stack
-
-- **Framework**: Next.js 16.1.1 (App Router)
-- **Language**: TypeScript
-- **State Management**: Zustand
-- **Styling**: Tailwind CSS
-- **Blockchain**: Solana (via @solana/web3.js)
-- **Wallet SDK**: @lazorkit/wallet
-- **Token Swaps**: Jupiter Aggregator API
-- **Notifications**: react-hot-toast
-- **Package Manager**: Bun (recommended)
+---
 
 ## Configuration
-
-### Environment Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `NEXT_PUBLIC_RPC_URL` | Solana RPC endpoint | `https://api.devnet.solana.com` |
 | `NEXT_PUBLIC_PORTAL_URL` | Lazorkit portal URL | `https://portal.lazor.sh` |
 | `NEXT_PUBLIC_PAYMASTER_URL` | Paymaster service URL | `https://kora.devnet.lazorkit.com` |
-| `NEXT_PUBLIC_PAYMASTER_API_KEY` | Paymaster API key (optional) | - |
-| `NEXT_PUBLIC_JUPITER_API_KEY` | Jupiter API key (required for swaps) | - |
+| `NEXT_PUBLIC_PAYMASTER_API_KEY` | Paymaster API key (optional) | — |
+| `NEXT_PUBLIC_JUPITER_API_KEY` | Jupiter API key (required for swaps) | — |
 
-> **Jupiter API Key**: Get your free API key from [portal.jup.ag](https://portal.jup.ag). The free tier provides 60 requests per minute. This project uses the latest Jupiter API (`api.jup.ag/swap/v1`) which requires an API key.
+**Jupiter API key:** grab a free one at [portal.jup.ag](https://portal.jup.ag) (60 req/min). This project uses the current `api.jup.ag/swap/v1` endpoint, which requires a key.
 
-### Jupiter API Integration
+**Network switching:** a toggle in the header switches between Devnet and Mainnet. The choice persists in `localStorage` and updates RPC endpoints, paymaster URLs, token mints, and explorer links. Reconnect your wallet after switching — smart wallet addresses are network-specific.
 
-This project uses the **latest Jupiter API** (`api.jup.ag/swap/v1`) with API key authentication:
+**Custom RPC:** for better reliability, point `NEXT_PUBLIC_RPC_URL` at [Helius](https://helius.dev), [QuickNode](https://quicknode.com), or [Alchemy](https://www.alchemy.com).
 
-- **Modern API**: Migrated from the deprecated `quote-api.jup.ag/v6` to the new `api.jup.ag/swap/v1` endpoint
-- **API Key Required**: Get your free API key from [portal.jup.ag](https://portal.jup.ag)
-- **Free Tier**: 60 requests per minute (perfect for development and testing)
-- **Direct Client Calls**: No proxy needed - Jupiter API supports CORS for authenticated requests
-- **Features**:
-  - Real-time swap quotes
-  - Multi-hop route optimization
-  - Automatic slippage protection
-  - Best price routing across all DEXs
+---
 
-**Setup:**
-1. Visit [portal.jup.ag](https://portal.jup.ag) and connect with email
-2. Generate a free API key
-3. Add it to your `.env.local` file as `NEXT_PUBLIC_JUPITER_API_KEY`
+## Documentation
 
-### Network Switching
+This repo has **three layers of documentation**:
 
-The application includes a network switcher in the top-right corner of every page that allows you to toggle between **Devnet** and **Mainnet**:
+| Layer | Location | Purpose |
+|-------|----------|---------|
+| **Live Docs** | [`/docs`](https://lazorkit-solanaux.vercel.app/docs) | VitePress site, built into the Next.js app |
+| **Tutorials** | [`tutorials/`](./tutorials) | Step-by-step walkthroughs with full code for each example |
+| **Smart Wallet Guide** | [`SMART_WALLET_GUIDE.md`](./SMART_WALLET_GUIDE.md) | What a smart wallet is, how it's created, how to fund it |
 
-- **Devnet**: Default network for testing. Uses test tokens and free faucet SOL.
-- **Mainnet**: Production network with real SOL and tokens.
+The VitePress docs build into `public/docs/` and are served by Next.js at `/docs` — no separate server. Run `bun run docs:build` after editing anything under `docs/`.
 
-**How it works:**
-- The network setting is persisted in `localStorage` and survives page refreshes
-- Switching networks automatically updates:
-  - RPC endpoints
-  - Paymaster service URLs
-  - Token mint addresses (USDC, USDT, etc.)
-  - Solana Explorer links
-  - All wallet operations
+---
 
-**Note**: When switching networks, you'll need to reconnect your wallet as the smart wallet addresses are network-specific.
+## Project Structure
 
-### Using Your Own RPC
-
-For better performance and reliability, use a dedicated RPC provider:
-
-```env
-NEXT_PUBLIC_RPC_URL=https://your-rpc-endpoint.com
+```
+lazorkit-solanaux/
+├── app/                    # Next.js App Router pages
+│   ├── page.tsx            # Home page (navigation hub)
+│   ├── passkey-login/      # Passkey authentication demo
+│   ├── gasless-transfer/   # Gasless token transfers
+│   ├── token-swap/         # Jupiter swap interface
+│   └── subscription/       # Subscription billing demo
+├── components/             # Reusable React components
+├── lib/
+│   ├── config/             # Lazorkit SDK configuration
+│   ├── hooks/              # useLazorkitWallet, useGaslessTransfer, useTokenSwap
+│   ├── store/              # Zustand wallet store
+│   └── utils/              # Error handling helpers
+├── docs/                   # VitePress source (builds to public/docs/)
+└── tutorials/              # Step-by-step guides
 ```
 
-Recommended providers:
-- [Helius](https://helius.dev)
-- [QuickNode](https://quicknode.com)
-- [Alchemy](https://www.alchemy.com)
+---
 
-## Customization
+## Live Demo
 
-### Adding New Features
+**[https://lazorkit-solanaux.vercel.app](https://lazorkit-solanaux.vercel.app)**
 
-1. **Create a new page** in `app/your-feature/page.tsx`
-2. **Add reusable components** in `components/` if needed
-3. **Add a custom hook** in `lib/hooks/` if needed
-4. **Update the home page** to include your feature card
+**Testing on Devnet:**
 
-### Styling
+1. Create a wallet with Face ID / Touch ID / fingerprint
+2. Get devnet SOL from the [Solana Faucet](https://faucet.solana.com)
+3. Get devnet USDC from the [Circle Faucet](https://faucet.circle.com)
+4. Try the examples
 
-The project uses Tailwind CSS. Customize colors and styles in `tailwind.config.ts`.
+---
 
-## Testing
+## Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| Framework | Next.js 16, React 19 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS 4 |
+| State | Zustand |
+| Blockchain | Solana (`@solana/web3.js`, `@solana/spl-token`) |
+| Wallet SDK | LazorKit 2.0.1 |
+| Swaps | Jupiter Aggregator API v1 |
+| Docs | VitePress |
+| Package Manager | Bun (recommended) |
+
+---
+
+## Key Concepts
+
+**Smart wallets** — Lazorkit derives a PDA smart wallet per user. It's controlled by your passkey, supports gasless transactions, can delegate permissions for recurring payments, and follows you across devices.
+
+**Gasless transactions** — the paymaster sponsors network fees, so users can send tokens without holding SOL and pay fees in USDC instead.
+
+---
+
+## Development
 
 ```bash
-# Type checking
-bun run type-check
-# or
-npm run type-check
-
-# Linting
-bun run lint
-# or
-npm run lint
-
-# Format code
-bun run format
-# or
-npm run format
+bun run type-check   # TypeScript
+bun run lint         # ESLint
+bun run format       # Prettier
 ```
 
 ## Deployment
 
-### Deploy to Vercel
+Configured for Vercel out of the box. The `prebuild` script runs `docs:build` before `next build`, so the VitePress docs ship with every deploy. Push to GitHub, import the project in [Vercel](https://vercel.com), and deploy — env vars are optional for Devnet.
 
-The app is configured for Vercel deployment out of the box. See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
-
-**Quick Deploy:**
-
-1. Push your code to GitHub
-2. Import the project in [Vercel](https://vercel.com)
-3. Add environment variables (optional - defaults work for Devnet)
-4. Deploy!
-
-**Note**: The VitePress documentation is automatically built during deployment via the `prebuild` script, which runs `docs:build` before `next build`. The built docs are output to `public/docs/` and served via the `/docs` route as static files.
-
-**Live Demo:** Once deployed, your app will be available at `https://your-project.vercel.app` with documentation at `https://your-project.vercel.app/docs`
-
-**Example Deployment**: 
-- **Live App**: [https://lazorkit-solanaux.vercel.app](https://lazorkit-solanaux.vercel.app)
-- **Documentation**: [https://lazorkit-solanaux.vercel.app/docs](https://lazorkit-solanaux.vercel.app/docs)
-
-**Example Deployment**: 
-- **Live App**: [https://lazorkit-solanaux.vercel.app](https://lazorkit-solanaux.vercel.app)
-- **Documentation**: [https://lazorkit-solanaux.vercel.app/docs](https://lazorkit-solanaux.vercel.app/docs)
-
-For detailed deployment instructions, troubleshooting, and best practices, see [DEPLOYMENT.md](./DEPLOYMENT.md).
-
-### Other Platforms
-
-The app can be deployed to any platform that supports Next.js:
-- Netlify
-- Railway
-- AWS Amplify
-- Self-hosted
-
-## Key Concepts
-
-### Passkeys vs Traditional Wallets
-
-| Traditional Wallets | Passkeys (Lazorkit) |
-|---------------------|---------------------|
-| Seed phrases to manage | Biometric authentication |
-| Browser extensions required | No extensions needed |
-| Manual transaction signing | One-click approval |
-| SOL needed for fees | Gasless transactions |
-
-### Smart Wallets
-
-Lazorkit creates a Program Derived Address (PDA) smart wallet for each user. This wallet:
-- Is controlled by your passkey
-- Supports gasless transactions
-- Can delegate permissions for recurring payments
-- Works across devices with the same passkey
-
-### Gasless Transactions
-
-The paymaster service sponsors transaction fees, allowing users to:
-- Send tokens without holding SOL
-- Pay fees in any token (e.g., USDC)
-- Onboard new users instantly
-
-## Contributing
-
-This is a bounty submission, but suggestions and improvements are welcome!
-
-## License
-
-MIT License - feel free to use this as a starter template for your own projects.
-
-## Resources
-
-- **Live Demo**: [https://lazorkit-solanaux.vercel.app](https://lazorkit-solanaux.vercel.app)
-- **Documentation**: [https://lazorkit-solanaux.vercel.app/docs](https://lazorkit-solanaux.vercel.app/docs)
-- [Lazorkit Documentation](https://docs.lazorkit.com)
-- [Lazorkit GitHub](https://github.com/lazor-kit/lazor-kit)
-- [Lazorkit Telegram](https://t.me/lazorkit)
-- [Solana Documentation](https://docs.solana.com)
-- [Jupiter Aggregator](https://jup.ag)
-- [Jupiter API Portal](https://portal.jup.ag) - Get your free API key
-- [Jupiter API Documentation](https://dev.jup.ag/docs/apis/swap-api)
-
-## Bounty Submission
-
-This project was built for the **Lazorkit Bounty** by Superteam Vietnam.
-
-**Judging Criteria:**
-- **Clarity & Usefulness (40%)** - Comprehensive README, detailed tutorials, well-commented code
-- **SDK Integration Quality (30%)** - Passkey auth, gasless transactions, smart wallet features
-- **Code Structure & Reusability (30%)** - Clean architecture, reusable hooks, starter template quality
-
-## Acknowledgments
-
-- Lazorkit team for the SDK
-- Superteam Vietnam for organizing the bounty
-- Jupiter team for the aggregator API
-- Solana Foundation for passkey support
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions and troubleshooting. Any Next.js host works (Netlify, Railway, AWS Amplify, self-hosted).
 
 ---
 
-**Built for the Solana ecosystem**
+## Bounty Submission
+
+Built for the [Superteam Vietnam x Lazorkit Bounty](https://earn.superteam.fun/listing/integrate-passkey-technology-with-lazorkit-to-10x-solana-ux).
+
+**Deliverables:**
+- 4 working examples with full tutorials
+- Live demo on Solana Devnet with Mainnet toggle
+- VitePress documentation site served at `/docs`
+- Reusable hooks and components as a starter template
+
+---
+
+## Resources
+
+- [Lazorkit Documentation](https://docs.lazorkit.com) · [GitHub](https://github.com/lazor-kit/lazor-kit) · [Telegram](https://t.me/lazorkit)
+- [Solana Documentation](https://docs.solana.com)
+- [Jupiter Aggregator](https://jup.ag) · [API Portal](https://portal.jup.ag) · [API Docs](https://dev.jup.ag/docs/apis/swap-api)
+
+---
+
+## Author
+
+**Sidharth P** — [GitHub](https://github.com/sidharthpunathil)
+
+## License
+
+MIT License — feel free to use this as a starting point for your own projects.
