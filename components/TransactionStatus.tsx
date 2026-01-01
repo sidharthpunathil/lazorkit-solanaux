@@ -1,7 +1,7 @@
 /**
  * TransactionStatus Component
  * 
- * Displays transaction status and explorer link.
+ * Displays transaction status and explorer link with detailed information.
  * Reusable component for showing transaction results.
  */
 
@@ -12,22 +12,65 @@ import { EXPLORER_URLS } from "@/lib/config/lazorkit";
 interface TransactionStatusProps {
   signature: string | null;
   message?: string;
+  transaction?: {
+    type: "SOL" | "USDC";
+    amount: number;
+    recipient: string;
+    network: "devnet" | "mainnet";
+  } | null;
 }
 
 export function TransactionStatus({
   signature,
   message = "Transaction Successful",
+  transaction,
 }: TransactionStatusProps) {
   if (!signature) return null;
 
-  const explorerUrl = `${EXPLORER_URLS.devnet}/tx/${signature}?cluster=devnet`;
+  const network = transaction?.network || "devnet";
+  const explorerUrl = network === "mainnet"
+    ? `${EXPLORER_URLS.mainnet}/tx/${signature}`
+    : `${EXPLORER_URLS.devnet}/tx/${signature}?cluster=devnet`;
 
   return (
     <div className="bg-green-50 border border-green-200 rounded-2xl p-6 mb-6">
-      <h3 className="text-lg font-semibold text-green-700 mb-3">{message}</h3>
-      <p className="text-sm text-green-600 mb-4">
-        Signature: <code className="font-mono text-green-700 bg-green-100 px-2 py-1 rounded-lg">{signature}</code>
-      </p>
+      <h3 className="text-lg font-semibold text-green-700 mb-4">{message}</h3>
+      
+      {/* Transaction Details */}
+      {transaction && (
+        <div className="mb-4 space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-green-600 font-medium">Type:</span>
+            <span className="text-green-700 font-semibold">{transaction.type}</span>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-green-600 font-medium">Amount:</span>
+            <span className="text-green-700 font-semibold">
+              {transaction.amount} {transaction.type}
+            </span>
+          </div>
+          <div className="flex items-start justify-between text-sm">
+            <span className="text-green-600 font-medium">Recipient:</span>
+            <span className="text-green-700 font-mono text-xs break-all text-right max-w-[60%]">
+              {transaction.recipient}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-green-600 font-medium">Network:</span>
+            <span className="text-green-700 font-semibold capitalize">{network}</span>
+          </div>
+        </div>
+      )}
+      
+      {/* Transaction Signature */}
+      <div className="mb-4 p-3 bg-green-100 rounded-lg">
+        <p className="text-xs text-green-600 font-medium mb-1.5">Transaction Signature:</p>
+        <code className="text-xs text-green-700 font-mono break-all block">
+          {signature}
+        </code>
+      </div>
+      
+      {/* Explorer Link */}
       <a
         href={explorerUrl}
         target="_blank"

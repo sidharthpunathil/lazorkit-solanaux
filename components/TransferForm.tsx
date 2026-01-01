@@ -9,6 +9,7 @@
 
 import { useState } from "react";
 import { useGaslessTransfer } from "@/lib/hooks/useGaslessTransfer";
+import toast from "react-hot-toast";
 
 interface TransferFormProps {
   type: "SOL" | "USDC";
@@ -63,8 +64,11 @@ export function TransferForm({
         });
       }
       onSuccess?.(signature);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Transfer failed:", error);
+      // Show user-friendly error message
+      const errorMessage = error?.message || "Transfer failed. Please try again.";
+      toast.error(errorMessage);
     }
   };
 

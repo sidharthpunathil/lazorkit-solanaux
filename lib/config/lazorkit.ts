@@ -14,12 +14,16 @@ import type { Network } from "@/lib/store/walletStore";
 
 export const NETWORK_CONFIG = {
   devnet: {
+    // Use Helius RPC if NEXT_PUBLIC_RPC_URL is set (e.g., https://devnet.helius-rpc.com/?api-key=...)
+    // Helius provides faster indexing and better reliability than public RPCs
     rpcUrl: process.env.NEXT_PUBLIC_RPC_URL || "https://api.devnet.solana.com",
     portalUrl: process.env.NEXT_PUBLIC_PORTAL_URL || "https://portal.lazor.sh",
     paymasterUrl: process.env.NEXT_PUBLIC_PAYMASTER_URL || "https://kora.devnet.lazorkit.com",
     explorerUrl: "https://explorer.solana.com/?cluster=devnet",
   },
   mainnet: {
+    // Use Helius RPC if NEXT_PUBLIC_RPC_URL is set (e.g., https://mainnet.helius-rpc.com/?api-key=...)
+    // Helius provides faster indexing and better reliability than public RPCs
     rpcUrl: process.env.NEXT_PUBLIC_RPC_URL || "https://api.mainnet-beta.solana.com",
     portalUrl: process.env.NEXT_PUBLIC_PORTAL_URL || "https://portal.lazor.sh",
     paymasterUrl: process.env.NEXT_PUBLIC_PAYMASTER_URL || "https://kora.mainnet.lazorkit.com",

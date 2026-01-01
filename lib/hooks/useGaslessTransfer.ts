@@ -11,7 +11,7 @@
  * - Transaction status tracking
  */
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLazorkitWallet } from "./useLazorkitWallet";
 import {
   SystemProgram,
@@ -29,6 +29,27 @@ import { getLazorkitConfig, DEVNET_USDC_MINT, MAINNET_USDC_MINT } from "@/lib/co
 import { useWalletStore } from "@/lib/store/walletStore";
 import toast from "react-hot-toast";
 
+/**
+ * Helper function to get fresh blockhash from server
+ * This ensures we have the latest blockhash before retrying transactions
+ */
+async function getFreshBlockhash(network: "devnet" | "mainnet"): Promise<void> {
+  try {
+    const response = await fetch(`/api/blockhash?network=${network}`);
+    if (!response.ok) {
+      console.warn("Failed to get fresh blockhash from server, continuing anyway");
+      return;
+    }
+    const data = await response.json();
+    if (data.success) {
+      console.log("Got fresh blockhash from server:", data.blockhash.slice(0, 8) + "...");
+    }
+  } catch (error) {
+    // Silently fail - this is just an optimization
+    console.warn("Error getting fresh blockhash:", error);
+  }
+}
+
 interface TransferOptions {
   readonly recipient: string;
   readonly amount: number; // Amount in SOL or token units
@@ -42,6 +63,13 @@ export function useGaslessTransfer() {
   const network = useWalletStore((state) => state.network);
   const [isTransferring, setIsTransferring] = useState(false);
   const [lastSignature, setLastSignature] = useState<string | null>(null);
+  const [lastTransaction, setLastTransaction] = useState<{
+    signature: string;
+    type: "SOL" | "USDC";
+    amount: number;
+    recipient: string;
+    network: "devnet" | "mainnet";
+  } | null>(null);
   
   // According to Lazorkit docs, wallet.smartWallet is the actual Solana address (Base58)
   // Use this as the primary source, with fallbacks
@@ -55,24 +83,97 @@ export function useGaslessTransfer() {
   
   if (smartWalletPubkey) {
     // Use PublicKey directly - this is the most reliable
+    // This is the Passkey Wallet (smart wallet) address
     effectiveSenderPubkey = smartWalletPubkey;
-    effectiveWalletAddress = smartWalletPubkey.toString();
+    effectiveWalletAddress = smartWalletPubkey.toBase58();
   } else if (walletSmartWallet) {
+    // Fallback to wallet.smartWallet string
     effectiveWalletAddress = walletSmartWallet;
+    try {
+      effectiveSenderPubkey = new PublicKey(walletSmartWallet);
+    } catch (e) {
+      // Only log errors, not every successful initialization
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Failed to create PublicKey from wallet.smartWallet:", e);
+      }
+    }
   } else if (smartWalletAddress) {
+    // Fallback to store's smartWalletAddress
     effectiveWalletAddress = smartWalletAddress;
+    try {
+      effectiveSenderPubkey = new PublicKey(smartWalletAddress);
+    } catch (e) {
+      // Only log errors, not every successful initialization
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Failed to create PublicKey from smartWalletAddress:", e);
+      }
+    }
   }
+  
+  // Only log validation warnings if there's an actual issue (not on every render)
+  // Use ref to track if we've already logged to avoid spam
+  const hasLoggedWarningRef = useRef(false);
+  useEffect(() => {
+    if (isConnected && (!effectiveWalletAddress || !effectiveSenderPubkey) && !hasLoggedWarningRef.current) {
+      // Only log warning once when the issue is detected
+      console.warn("Passkey Wallet address not yet available, but wallet is connected. This may resolve after wallet initialization.");
+      hasLoggedWarningRef.current = true;
+    } else if (effectiveWalletAddress && effectiveSenderPubkey) {
+      // Reset the flag if address becomes available
+      hasLoggedWarningRef.current = false;
+    }
+  }, [isConnected, effectiveWalletAddress, effectiveSenderPubkey]);
 
   /**
    * Transfer SOL gaslessly
    */
   const transferSOL = async (options: TransferOptions) => {
-    if (!isConnected || !effectiveWalletAddress) {
-      throw new Error("Wallet not connected");
+    if (!isConnected) {
+      throw new Error("Wallet not connected. Please connect your Passkey Wallet first.");
+    }
+    
+    // Validate that we have the smart wallet address (Passkey Wallet)
+    // Try to get it one more time in case it wasn't available on initial render
+    let currentEffectiveWalletAddress = effectiveWalletAddress;
+    let currentEffectiveSenderPubkey = effectiveSenderPubkey;
+    
+    if (!currentEffectiveWalletAddress || !currentEffectiveSenderPubkey) {
+      const retrySmartWalletPubkey = lazorkitWallet?.smartWalletPubkey;
+      const retryWalletSmartWallet = lazorkitWallet?.wallet?.smartWallet;
+      const retrySmartWalletAddress = smartWalletAddress;
+      
+      if (retrySmartWalletPubkey) {
+        currentEffectiveSenderPubkey = retrySmartWalletPubkey;
+        currentEffectiveWalletAddress = retrySmartWalletPubkey.toBase58();
+      } else if (retryWalletSmartWallet) {
+        currentEffectiveWalletAddress = retryWalletSmartWallet;
+        try {
+          currentEffectiveSenderPubkey = new PublicKey(retryWalletSmartWallet);
+        } catch (e) {
+          // Will throw below
+        }
+      } else if (retrySmartWalletAddress) {
+        currentEffectiveWalletAddress = retrySmartWalletAddress;
+        try {
+          currentEffectiveSenderPubkey = new PublicKey(retrySmartWalletAddress);
+        } catch (e) {
+          // Will throw below
+        }
+      }
+      
+      // If still not available, throw error
+      if (!currentEffectiveWalletAddress || !currentEffectiveSenderPubkey) {
+        throw new Error(
+          "Passkey Wallet (smart wallet) address not available. " +
+          "Please ensure your wallet is fully connected and try again. " +
+          "If the issue persists, try disconnecting and reconnecting your wallet."
+        );
+      }
     }
 
     setIsTransferring(true);
     setLastSignature(null);
+    setLastTransaction(null);
 
     try {
       // Validate recipient address
@@ -102,8 +203,30 @@ export function useGaslessTransfer() {
         throw new Error("Cannot send SOL to your own address. Please use a different recipient address.");
       }
 
-      const senderPubkey = new PublicKey(effectiveWalletAddress);
+      // Ensure we use the smart wallet (passkey wallet) as the sender
+      // This is critical - the source must be the Passkey Wallet for gasless transactions
+      if (!effectiveSenderPubkey) {
+        throw new Error("Smart wallet (Passkey Wallet) address not available. Please reconnect your wallet.");
+      }
+      
+      const senderPubkey = effectiveSenderPubkey; // Use the smart wallet directly
       const amountLamports = options.amount * LAMPORTS_PER_SOL;
+      
+      // Validate sender is the smart wallet
+      if (senderPubkey.toBase58() !== currentEffectiveWalletAddress) {
+        console.warn("Sender pubkey mismatch:", {
+          senderPubkey: senderPubkey.toBase58(),
+          currentEffectiveWalletAddress,
+        });
+      }
+      
+      // Log sender/recipient for debugging (only in development)
+      if (process.env.NODE_ENV === 'development') {
+        console.log("=== SOL Transfer Addresses ===");
+        console.log("Sender (Smart Wallet/Passkey Wallet):", senderPubkey.toBase58());
+        console.log("Recipient:", recipientPubkey.toBase58());
+        console.log("Recipient from options:", options.recipient);
+      }
 
       // Validate amount
       if (options.amount <= 0 || !isFinite(options.amount)) {
@@ -118,7 +241,7 @@ export function useGaslessTransfer() {
       try {
         const accountInfo = await connection.getAccountInfo(recipientPubkey, "confirmed");
         accountExists = accountInfo !== null && (accountInfo.lamports ?? 0) > 0;
-        if (accountExists && accountInfo) {
+        if (accountExists && accountInfo && process.env.NODE_ENV === 'development') {
           console.log(`Recipient account exists with ${accountInfo.lamports / LAMPORTS_PER_SOL} SOL`);
         }
       } catch (error: any) {
@@ -134,6 +257,67 @@ export function useGaslessTransfer() {
         lamports: amountLamports,
       });
 
+      // Validate instruction before logging
+      // For SOL transfers, the source MUST be the Passkey Wallet (smart wallet)
+      if (senderPubkey.toBase58() !== effectiveWalletAddress) {
+        throw new Error(
+          `Invalid sender address. Expected Passkey Wallet (${effectiveWalletAddress}), ` +
+          `but got ${senderPubkey.toBase58()}. Please reconnect your wallet.`
+        );
+      }
+      
+      // Validate recipient is not a token mint address
+      const USDC_MINT_MAINNET = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+      const USDC_MINT_DEVNET = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU";
+      const recipientAddressStr = recipientPubkey.toBase58();
+      if (recipientAddressStr === USDC_MINT_MAINNET || recipientAddressStr === USDC_MINT_DEVNET) {
+        throw new Error(
+          `Invalid recipient address: "${recipientAddressStr}" is a token mint address, not a wallet address. ` +
+          `You cannot send SOL to a token mint. Please enter a valid Solana wallet address (starts with a letter, 32-44 characters).`
+        );
+      }
+      
+      // Log instruction details for debugging (only in development)
+      if (process.env.NODE_ENV === 'development') {
+        console.log("=== Transfer Instruction Details ===");
+        console.log("Instruction Program ID:", instruction.programId.toBase58());
+        console.log("Instruction Keys:", instruction.keys.map(k => ({
+          pubkey: k.pubkey.toBase58(),
+          isSigner: k.isSigner,
+          isWritable: k.isWritable,
+        })));
+        console.log("Instruction Data Length:", instruction.data.length);
+        console.log("From (Sender - Passkey Wallet):", senderPubkey.toBase58());
+        console.log("To (Recipient):", recipientPubkey.toBase58());
+        console.log("Amount (lamports):", amountLamports);
+        console.log("Amount (SOL):", options.amount);
+      }
+      
+      // Validate the instruction keys match what we expect
+      if (instruction.keys.length < 2) {
+        throw new Error("Invalid instruction: Expected at least 2 keys (sender and recipient)");
+      }
+      if (instruction.keys[0].pubkey.toBase58() !== senderPubkey.toBase58()) {
+        throw new Error(
+          `Instruction key mismatch: First key should be sender (${senderPubkey.toBase58()}), ` +
+          `but got ${instruction.keys[0].pubkey.toBase58()}`
+        );
+      }
+      if (instruction.keys[1].pubkey.toBase58() !== recipientPubkey.toBase58()) {
+        throw new Error(
+          `Instruction key mismatch: Second key should be recipient (${recipientPubkey.toBase58()}), ` +
+          `but got ${instruction.keys[1].pubkey.toBase58()}`
+        );
+      }
+
+      // Get fresh blockhash from server before first attempt (helps prevent TransactionTooOld errors)
+      await getFreshBlockhash(network);
+      
+      // Log RPC URL being used (only in development)
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Using RPC: ${config.RPC_URL.includes('helius') ? 'Helius' : 'Public'} - ${config.RPC_URL.split('?')[0]}`);
+      }
+
       // Sign and send transaction with gasless option
       // Retry logic for TransactionTooOld errors (can happen if user takes too long to sign)
       let signature: string | undefined;
@@ -142,16 +326,43 @@ export function useGaslessTransfer() {
       
       while (retries <= maxRetries) {
         try {
-          signature = await (signAndSendTransaction as any)({
-        instructions: [instruction],
-        transactionOptions: {
-          // Pay fees with USDC if specified, otherwise use default (SOL)
-          feeToken: options.feeToken === "USDC" ? "USDC" : undefined,
-              // Only enable simulation if account exists - avoids portal simulation errors for new accounts
-              // On Solana, accounts are created automatically when SOL is sent, so simulation isn't critical
-              clusterSimulation: accountExists ? (network === "devnet" ? "devnet" : "mainnet") : undefined,
-            },
-          });
+          const transactionOptions = {
+            // Pay fees with USDC if specified, otherwise use default (SOL)
+            feeToken: options.feeToken === "USDC" ? "USDC" : undefined,
+            // Only enable simulation if account exists - avoids portal simulation errors for new accounts
+            // On Solana, accounts are created automatically when SOL is sent, so simulation isn't critical
+            clusterSimulation: accountExists ? (network === "devnet" ? "devnet" : "mainnet") : undefined,
+          };
+          
+          const payload = {
+            instructions: [instruction],
+            transactionOptions,
+          };
+          
+          // Log transaction options for debugging (only in development)
+          if (process.env.NODE_ENV === 'development') {
+            console.log("=== Transaction Options ===");
+            console.log("Fee Token:", transactionOptions.feeToken || "SOL (default)");
+            console.log("Cluster Simulation:", transactionOptions.clusterSimulation || "disabled");
+            console.log("Network:", network);
+            console.log("Account Exists:", accountExists);
+            console.log("Retry Attempt:", retries + 1, "/", maxRetries + 1);
+            console.log("=== Full Payload to signAndSendTransaction ===");
+            console.log(JSON.stringify({
+              instructions: [{
+                programId: instruction.programId.toBase58(),
+                keys: instruction.keys.map(k => ({
+                  pubkey: k.pubkey.toBase58(),
+                  isSigner: k.isSigner,
+                  isWritable: k.isWritable,
+                })),
+                dataLength: instruction.data.length,
+              }],
+              transactionOptions,
+            }, null, 2));
+          }
+          
+          signature = await (signAndSendTransaction as any)(payload);
           break; // Success, exit retry loop
         } catch (error: any) {
           const errorMessage = error?.message || "";
@@ -198,6 +409,9 @@ export function useGaslessTransfer() {
               `Transaction expired${isCreateChunkError ? " during creation" : ""}. ` +
               `Retrying... (${retries}/${maxRetries})`
             );
+            
+            // Get fresh blockhash from server before retrying (helps ensure RPC is ready)
+            await getFreshBlockhash(network);
             
             // Wait for blockhash to refresh
             await new Promise(resolve => setTimeout(resolve, waitTime));
@@ -340,8 +554,13 @@ export function useGaslessTransfer() {
                   retries++;
                   
                   // Wait longer for devnet (RPCs are slower) vs mainnet
-                  const baseWaitTime = network === "devnet" ? 5000 : 3000; // 5s for devnet, 3s for mainnet
-                  const waitTime = baseWaitTime * retries; // Exponential backoff: 5s/10s for devnet, 3s/6s for mainnet
+                  // Devnet RPCs can take 15-20 seconds to index accounts after confirmation
+                  // This is a known issue with public devnet RPCs - they're slow at indexing
+                  // IMPORTANT: When we retry, SDK creates a NEW chunk with a NEW nonce
+                  // So the chunk account address will be different - we can't poll for it
+                  // We just need to wait long enough for RPC to be ready to index new accounts
+                  const baseWaitTime = network === "devnet" ? 15000 : 5000; // 15s for devnet, 5s for mainnet
+                  const waitTime = baseWaitTime * retries; // Exponential backoff: 15s/30s for devnet, 5s/10s for mainnet
                   
                   console.warn(
                     `Chunk account not yet indexed (account: ${errorAccountAddress}), ` +
@@ -352,44 +571,66 @@ export function useGaslessTransfer() {
                   );
                   
                   // Poll for chunk account to be available (up to waitTime)
+                  // Note: When we retry, SDK creates a NEW chunk with a different address
+                  // So we're polling for the old chunk just to ensure RPC has time to index
                   const chunkPubkey = new PublicKey(errorAccountAddress);
-                  const maxPollAttempts = Math.ceil(waitTime / 500); // Poll every 500ms
+                  const maxPollAttempts = Math.ceil(waitTime / 1000); // Poll every 1 second
                   let pollAttempts = 0;
                   let accountAvailable = false;
                   
                   while (pollAttempts < maxPollAttempts && !accountAvailable) {
                     try {
-                      const accountInfo = await connection.getAccountInfo(chunkPubkey, "confirmed");
+                      // Try multiple commitment levels - sometimes "confirmed" isn't enough
+                      // Try "finalized" first (most reliable), then "confirmed"
+                      let accountInfo = await connection.getAccountInfo(chunkPubkey, "finalized");
+                      if (accountInfo === null) {
+                        accountInfo = await connection.getAccountInfo(chunkPubkey, "confirmed");
+                      }
+                      
                       if (accountInfo !== null) {
                         accountAvailable = true;
                         console.log(
-                          `Chunk account ${errorAccountAddress} is now available after ${pollAttempts} attempts (${pollAttempts * 500}ms)`
+                          `Chunk account ${errorAccountAddress} is now available after ${pollAttempts} attempts (${pollAttempts * 1000}ms)`
                         );
                         break;
                       }
-                    } catch (pollError) {
+                    } catch (pollError: any) {
+                      // Check if it's a rate limit error - if so, wait longer
+                      const isRateLimit = pollError?.message?.includes("429") || 
+                                         pollError?.message?.includes("Too many requests");
+                      if (isRateLimit) {
+                        console.warn("Rate limited while polling chunk account, waiting longer...");
+                        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s for rate limit
+                      }
                       // Account still not available, continue polling
                     }
                     
                     pollAttempts++;
                     if (pollAttempts < maxPollAttempts) {
-                      await new Promise(resolve => setTimeout(resolve, 500)); // Poll every 500ms
+                      await new Promise(resolve => setTimeout(resolve, 1000)); // Poll every 1 second
                     }
                   }
                   
+                  // Always wait additional time before retrying
+                  // This ensures RPC has time to index accounts in general
+                  // When we retry, SDK creates a NEW chunk, so we need RPC to be ready
+                  // Even with Helius RPC, devnet can take 10-15 seconds for account indexing
+                  // Mainnet is faster but still needs 3-5 seconds
+                  const additionalWait = network === "devnet" ? 15000 : 5000; // 15s devnet, 5s mainnet
+                  
                   if (accountAvailable) {
-                    console.log(`Chunk account is available, waiting additional 2s for full RPC sync before retrying...`);
+                    console.log(`Chunk account is available, waiting additional ${additionalWait}ms for full RPC sync before retrying...`);
                     // Wait additional time to ensure RPC has fully indexed and synced
-                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    await new Promise(resolve => setTimeout(resolve, additionalWait));
                     continue;
                   } else {
                     console.warn(
-                      `Chunk account still not available after ${maxPollAttempts} attempts (${maxPollAttempts * 500}ms), ` +
-                      `but waiting additional time before retry to give RPC more time...`
+                      `Chunk account still not available after ${maxPollAttempts} attempts (${maxPollAttempts * 1000}ms), ` +
+                      `waiting additional ${additionalWait}ms before retry to give RPC more time...`
                     );
-                    // Wait additional time before retrying to give RPC more time to index
-                    // This helps because when we retry, a NEW chunk will be created
-                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    // Wait additional time before retrying
+                    // Devnet RPCs can be very slow at indexing, so wait longer
+                    await new Promise(resolve => setTimeout(resolve, additionalWait));
                     continue;
                   }
                 }
@@ -397,8 +638,13 @@ export function useGaslessTransfer() {
                 throw new Error(
                   `Transaction failed: Chunk account not yet available after retries. ` +
                   `The transaction chunk was created but the account "${errorAccountAddress}" hasn't been indexed by the RPC yet. ` +
-                  `This is a temporary timing issue with ${network === "devnet" ? "devnet" : "mainnet"} RPC indexing. ` +
-                  `Please wait 10-15 seconds and try again. The chunk account should be indexed shortly.`
+                  `\n\nThis is a known issue with ${network === "devnet" ? "devnet" : "mainnet"} RPC indexing delays. ` +
+                  `Public RPC endpoints can take 15-30 seconds to index accounts after confirmation. ` +
+                  `\n\nSolutions:\n` +
+                  `1. Wait 20-30 seconds and try again\n` +
+                  `2. Use a faster RPC endpoint (e.g., Helius, QuickNode)\n` +
+                  `3. Try on mainnet (faster indexing)\n\n` +
+                  `The chunk account should be indexed shortly. This is a temporary RPC limitation, not a transaction failure.`
                 );
               }
               
@@ -431,6 +677,13 @@ export function useGaslessTransfer() {
       }
 
       setLastSignature(signature);
+      setLastTransaction({
+        signature,
+        type: "SOL",
+        amount: options.amount,
+        recipient: recipientAddress,
+        network,
+      });
       toast.success(
         `Successfully sent ${options.amount} SOL! Transaction: ${signature.slice(0, 8)}...`
       );
@@ -464,6 +717,7 @@ export function useGaslessTransfer() {
 
     setIsTransferring(true);
     setLastSignature(null);
+    setLastTransaction(null);
 
     try {
       // Use network-aware config
@@ -673,6 +927,24 @@ export function useGaslessTransfer() {
       );
       instructions.push(transferInstruction);
 
+      // Get fresh blockhash from server before first attempt (helps prevent TransactionTooOld errors)
+      await getFreshBlockhash(network);
+
+      // Log instructions for debugging
+      console.log("=== Token Transfer Instructions ===");
+      console.log("Number of instructions:", instructions.length);
+      instructions.forEach((ix, idx) => {
+        console.log(`Instruction ${idx + 1}:`, {
+          programId: ix.programId.toBase58(),
+          keys: ix.keys.map(k => ({
+            pubkey: k.pubkey.toBase58(),
+            isSigner: k.isSigner,
+            isWritable: k.isWritable,
+          })),
+          dataLength: ix.data.length,
+        });
+      });
+
       // Sign and send transaction gaslessly
       // Set clusterSimulation to match the current network for accurate simulation
       // Retry logic for TransactionTooOld errors (can happen if user takes too long to sign)
@@ -682,13 +954,39 @@ export function useGaslessTransfer() {
       
       while (retries <= maxRetries) {
         try {
-          signature = await (signAndSendTransaction as any)({
-        instructions,
-        transactionOptions: {
-          feeToken: options.feeToken || "USDC", // Pay fees with USDC
-              clusterSimulation: network, // Use current network for simulation
-        },
-      });
+          const transactionOptions = {
+            feeToken: options.feeToken || "USDC", // Pay fees with USDC
+            clusterSimulation: network, // Use current network for simulation
+          };
+          
+          const payload = {
+            instructions,
+            transactionOptions,
+          };
+          
+          // Log transaction options for debugging (only in development)
+          if (process.env.NODE_ENV === 'development') {
+            console.log("=== Token Transfer Transaction Options ===");
+            console.log("Fee Token:", transactionOptions.feeToken);
+            console.log("Cluster Simulation:", transactionOptions.clusterSimulation);
+            console.log("Network:", network);
+            console.log("Retry Attempt:", retries + 1, "/", maxRetries + 1);
+            console.log("=== Full Payload to signAndSendTransaction ===");
+            console.log(JSON.stringify({
+              instructions: instructions.map(ix => ({
+                programId: ix.programId.toBase58(),
+                keys: ix.keys.map(k => ({
+                  pubkey: k.pubkey.toBase58(),
+                  isSigner: k.isSigner,
+                  isWritable: k.isWritable,
+                })),
+                dataLength: ix.data.length,
+              })),
+              transactionOptions,
+            }, null, 2));
+          }
+          
+          signature = await (signAndSendTransaction as any)(payload);
           break; // Success, exit retry loop
         } catch (error: any) {
           const errorMessage = error?.message || "";
@@ -732,6 +1030,9 @@ export function useGaslessTransfer() {
               `Retrying... (${retries}/${maxRetries})`
             );
             
+            // Get fresh blockhash from server before retrying (helps ensure RPC is ready)
+            await getFreshBlockhash(network);
+            
             // Wait for blockhash to refresh
             await new Promise(resolve => setTimeout(resolve, waitTime));
             continue;
@@ -747,6 +1048,13 @@ export function useGaslessTransfer() {
       }
 
       setLastSignature(signature);
+      setLastTransaction({
+        signature,
+        type: "USDC",
+        amount: options.amount,
+        recipient: options.recipient.trim(),
+        network,
+      });
       toast.success(
         `Successfully sent ${options.amount} tokens! Transaction: ${signature.slice(0, 8)}...`
       );
@@ -761,11 +1069,12 @@ export function useGaslessTransfer() {
     }
   };
 
-  return {
-    transferSOL,
-    transferToken,
-    isTransferring,
-    lastSignature,
-  };
+    return {
+      transferSOL,
+      transferToken,
+      isTransferring,
+      lastSignature,
+      lastTransaction,
+    };
 }
 

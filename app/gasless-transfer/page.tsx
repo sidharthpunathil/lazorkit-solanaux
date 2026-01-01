@@ -28,6 +28,7 @@ export default function GaslessTransferPage() {
     transferToken,
     isTransferring,
     lastSignature,
+    lastTransaction,
   } = useGaslessTransfer();
 
   return (
@@ -86,7 +87,12 @@ export default function GaslessTransferPage() {
               isTransferring={isTransferring}
             />
 
-            {lastSignature && <TransactionStatus signature={lastSignature} />}
+            {lastSignature && (
+              <TransactionStatus 
+                signature={lastSignature} 
+                transaction={lastTransaction || undefined}
+              />
+            )}
 
             <InfoCard
               title="How Gasless Transactions Work"
