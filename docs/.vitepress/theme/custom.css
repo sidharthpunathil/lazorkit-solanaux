@@ -1,0 +1,65 @@
+/**
+ * Custom VitePress Theme Styles
+ * Supports both light and dark modes
+ */
+
+/* Light mode (default) */
+:root {
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-alt: #f6f6f7;
+  --vp-c-bg-elv: #ffffff;
+  --vp-c-bg-soft: #f6f6f7;
+  
+  --vp-c-text: #1f1f23;
+  --vp-c-text-1: #1f1f23;
+  --vp-c-text-2: #6b7280;
+  
+  --vp-c-brand: #a855f7;
+  --vp-c-brand-1: #9333ea;
+  --vp-c-brand-2: #7e22ce;
+  --vp-c-brand-3: #6b21a8;
+  
+  --vp-c-divider: #e5e7eb;
+  --vp-c-border: #e5e7eb;
+  
+  --vp-button-brand-bg: #a855f7;
+  --vp-button-brand-hover-bg: #9333ea;
+  
+  color-scheme: light;
+}
+
+/* Dark mode */
+.dark {
+  --vp-c-bg: #0a0a0a;
+  --vp-c-bg-alt: #1a1a1a;
+  --vp-c-bg-elv: #2a2a2a;
+  --vp-c-bg-soft: #1a1a1a;
+  
+  --vp-c-text: #ededed;
+  --vp-c-text-1: #ededed;
+  --vp-c-text-2: #a0a0a0;
+  
+  --vp-c-brand: #a855f7;
+  --vp-c-brand-1: #9333ea;
+  --vp-c-brand-2: #7e22ce;
+  --vp-c-brand-3: #6b21a8;
+  
+  --vp-c-divider: #2a2a2a;
+  --vp-c-border: #2a2a2a;
+  
+  --vp-button-brand-bg: #a855f7;
+  --vp-button-brand-hover-bg: #9333ea;
+  
+  color-scheme: dark;
+}
+
+/* Apply theme colors */
+html {
+  background: var(--vp-c-bg);
+  color: var(--vp-c-text);
+}
+
+html.dark {
+  color-scheme: dark;
+}
+

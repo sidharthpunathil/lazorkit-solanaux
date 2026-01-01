@@ -1,0 +1,44 @@
+{
+  "name": "lazorkit-solanaux",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:with-docs": "concurrently \"next dev\" \"vitepress dev docs\"",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "format": "prettier --write .",
+    "type-check": "tsc --noEmit",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "dependencies": {
+    "@lazorkit/wallet": "^1.0.0",
+    "@solana/web3.js": "^1.95.8",
+    "@solana/spl-token": "^0.4.8",
+    "@coral-xyz/anchor": "^0.30.1",
+    "next": "^16.1.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zustand": "^5.0.2",
+    "react-hot-toast": "^2.4.1",
+    "buffer": "^6.0.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.0.6",
+    "@types/react-dom": "^19.0.2",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "^16.1.1",
+    "postcss": "^8.4.49",
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.9",
+    "tailwindcss": "^4",
+    "typescript": "^5.7.2",
+    "vitepress": "^1.6.3"
+  }
+}
