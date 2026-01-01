@@ -14,7 +14,7 @@
 import { useState, useEffect } from "react";
 import { useLazorkitWallet } from "./useLazorkitWallet";
 import { PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { LAZORKIT_CONFIG } from "@/lib/config/lazorkit";
+import { LAZORKIT_CONFIG, JUPITER_API_KEY, JUPITER_API_BASE_URL } from "@/lib/config/lazorkit";
 import toast from "react-hot-toast";
 
 import { useWalletStore, type Network } from "@/lib/store/walletStore";
@@ -67,6 +67,11 @@ export function useTokenSwap() {
       throw new Error("Wallet not connected");
     }
 
+    // Jupiter API only works on mainnet
+    if (network === "devnet") {
+      throw new Error("Jupiter API only works on Solana Mainnet, not Devnet. Please switch to Mainnet to use token swaps.");
+    }
+
     setIsFetchingQuote(true);
     setQuote(null);
 
@@ -79,36 +84,50 @@ export function useTokenSwap() {
         ? amount * 1_000_000_000 // SOL has 9 decimals
         : amount * 1_000_000; // USDC/USDT have 6 decimals
 
-      // Fetch quote from Jupiter API
-      // Jupiter API v6 automatically detects network from RPC, but we can specify it
-      // For devnet, Jupiter may have limited liquidity
-      const baseUrl = network === "mainnet" 
-        ? "https://quote-api.jup.ag/v6"
-        : "https://quote-api.jup.ag/v6"; // Same API, but devnet has limited support
-      
-      const quoteUrl = new URL(`${baseUrl}/quote`);
+      // Fetch quote from Jupiter API (new endpoint with API key)
+      // Using https://api.jup.ag/swap/v1/quote (migrated from quote-api.jup.ag/v6)
+      const quoteUrl = new URL(`${JUPITER_API_BASE_URL}/swap/v1/quote`);
       quoteUrl.searchParams.set("inputMint", inputMint);
       quoteUrl.searchParams.set("outputMint", outputMint);
       quoteUrl.searchParams.set("amount", amountInSmallestUnit.toString());
       quoteUrl.searchParams.set("slippageBps", slippageBps.toString());
-      quoteUrl.searchParams.set("onlyDirectRoutes", "false");
+      quoteUrl.searchParams.set("onlyDirectRoutes", "false"); // Allow multi-hop routes for better prices
+      quoteUrl.searchParams.set("asLegacyTransaction", "false"); // Use versioned transactions (V0)
+      quoteUrl.searchParams.set("restrictIntermediateTokens", "true"); // Use stable intermediate tokens to reduce slippage
 
+      // Validate URL before fetching
+      const urlString = quoteUrl.toString();
+      console.log("Fetching Jupiter quote from:", urlString);
+      
+      // Prepare headers with API key
+      const headers: HeadersInit = {
+        "Accept": "application/json",
+      };
+      
+      if (JUPITER_API_KEY) {
+        headers["x-api-key"] = JUPITER_API_KEY;
+      } else {
+        console.warn("Jupiter API key not found. Some features may not work.");
+      }
+      
       let response: Response;
+      let timeoutId: ReturnType<typeof setTimeout> | null = null;
       try {
         // Add timeout to prevent hanging requests
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-        response = await fetch(quoteUrl.toString(), {
+        response = await fetch(urlString, {
           method: "GET",
-          headers: {
-            "Accept": "application/json",
-          },
+          headers,
+          mode: "cors",
           signal: controller.signal,
         });
 
-        clearTimeout(timeoutId);
+        if (timeoutId) clearTimeout(timeoutId);
       } catch (fetchError: any) {
+        if (timeoutId) clearTimeout(timeoutId);
+        
         // Handle different types of fetch errors
         if (fetchError.name === "AbortError") {
           throw new Error(
@@ -116,24 +135,42 @@ export function useTokenSwap() {
           );
         }
 
-        // Network error (CORS, connection failed, etc.)
+        // Network error (connection failed, etc.)
         const errorMessage = fetchError?.message || "Failed to connect to Jupiter API";
-        console.error("Jupiter API fetch error:", fetchError);
+        const errorName = fetchError?.name || "Unknown";
+        
+        console.error("Jupiter API fetch error:", {
+          name: errorName,
+          message: errorMessage,
+          url: urlString,
+          network,
+          error: fetchError,
+        });
+        
+        // Check if it's a server error (502/504 from our API route)
+        if (errorMessage.includes("502") || errorMessage.includes("504")) {
+          throw new Error(
+            "Jupiter API is currently unavailable. This could be due to:\n" +
+            "- Jupiter API server is down or experiencing issues\n" +
+            "- Network connectivity problems\n" +
+            "- Server-side firewall blocking the request\n\n" +
+            "Please try again in a few moments or check Jupiter's status page."
+          );
+        }
         
         // Provide more helpful error messages
-        if (errorMessage.includes("Failed to fetch") || errorMessage.includes("NetworkError")) {
-          const networkNote = network === "devnet"
-            ? "\n\nNote: You're on Devnet. Jupiter API has limited Devnet support. " +
-              "Some token pairs may not have liquidity. Try switching to Mainnet or try SOL ↔ USDC swaps first."
-            : "\n\nNote: If you're experiencing issues, try switching to Devnet for testing.";
-          
+        if (
+          errorMessage.includes("Failed to fetch") || 
+          errorMessage.includes("NetworkError") ||
+          errorName === "TypeError" ||
+          errorMessage.includes("fetch failed")
+        ) {
           throw new Error(
             "Network error: Unable to reach Jupiter API. This could be due to:\n" +
             "- Internet connection issues\n" +
-            "- CORS restrictions (try a different browser)\n" +
-            "- Jupiter API temporarily unavailable" +
-            networkNote +
-            "\n\nPlease check your connection and try again."
+            "- Jupiter API temporarily unavailable\n" +
+            "- Server-side network configuration issues\n\n" +
+            "Please check your connection and try again."
           );
         }
         
@@ -192,34 +229,47 @@ export function useTokenSwap() {
       throw new Error("Wallet not connected or quote not available");
     }
 
+    // Jupiter API only works on mainnet
+    if (network === "devnet") {
+      throw new Error("Jupiter API only works on Solana Mainnet, not Devnet. Please switch to Mainnet to use token swaps.");
+    }
+
     setIsSwapping(true);
     setLastSwapSignature(null);
 
     try {
       const userPublicKey = new PublicKey(smartWalletAddress);
 
-      // Get swap transaction from Jupiter
+      // Get swap transaction from Jupiter API (new endpoint with API key)
+      // Using https://api.jup.ag/swap/v1/swap (migrated from quote-api.jup.ag/v6)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
-      // Get swap transaction from Jupiter
-      const swapBaseUrl = network === "mainnet"
-        ? "https://quote-api.jup.ag/v6"
-        : "https://quote-api.jup.ag/v6";
+      const swapUrl = `${JUPITER_API_BASE_URL}/swap/v1/swap`;
+      
+      // Prepare headers with API key
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      
+      if (JUPITER_API_KEY) {
+        headers["x-api-key"] = JUPITER_API_KEY;
+      } else {
+        console.warn("Jupiter API key not found. Some features may not work.");
+      }
       
       let response: Response;
       try {
-        response = await fetch(`${swapBaseUrl}/swap`, {
+        response = await fetch(swapUrl, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers,
+          mode: "cors",
           body: JSON.stringify({
             quoteResponse: quote,
             userPublicKey: smartWalletAddress,
             wrapAndUnwrapSol: true,
             dynamicComputeUnitLimit: true,
-            prioritizationFeeLamports: "auto",
+            prioritizationFeeLamports: "auto", // Auto-calculate priority fee
           }),
           signal: controller.signal,
         });

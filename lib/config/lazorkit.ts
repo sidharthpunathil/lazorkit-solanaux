@@ -40,6 +40,10 @@ export const getLazorkitConfig = (network: Network = "devnet") => {
   };
 };
 
+// Jupiter API configuration
+export const JUPITER_API_KEY = process.env.NEXT_PUBLIC_JUPITER_API_KEY || "";
+export const JUPITER_API_BASE_URL = "https://api.jup.ag";
+
 // Default config (for backward compatibility)
 export const LAZORKIT_CONFIG = getLazorkitConfig("devnet");
 

@@ -16,6 +16,8 @@ This repository provides a production-ready example of integrating Lazorkit SDK 
 - **Subscription Billing** - Recurring payments with smart wallet delegation
 
 > **Network**: All features work on **Solana Devnet** by default. This is perfect for testing and development. The configuration uses Devnet RPC endpoints, Devnet paymaster, and Devnet token mints. See the [Smart Wallet Guide in Docs](/docs/smart-wallet-guide) for details on funding your wallet with test SOL.
+>
+> **Network Switcher**: You can switch between Devnet and Mainnet using the network toggle in the top-right corner of any page. The network setting persists across page refreshes and affects all operations (RPC endpoints, paymaster, token mints, and explorer links).
 
 ## Features
 
@@ -43,10 +45,11 @@ This repository provides a production-ready example of integrating Lazorkit SDK 
 ### Advanced Features
 
 3. **Token Swap Interface**
-   - Jupiter aggregator integration
+   - Latest Jupiter API integration (v1 with API key support)
    - Best price routing across all DEXs
    - Gasless swap execution
    - Real-time quotes with slippage protection
+   - Multi-hop swaps with automatic route optimization
 
 4. **Subscription Service**
    - One-time approval for recurring charges
@@ -107,6 +110,7 @@ The `.env.example` file contains all available environment variables with their 
 - `NEXT_PUBLIC_PORTAL_URL` - Lazorkit portal URL (usually don't need to change)
 - `NEXT_PUBLIC_PAYMASTER_URL` - Paymaster service URL (default: Devnet)
 - `NEXT_PUBLIC_PAYMASTER_API_KEY` - Optional API key for paymaster
+- `NEXT_PUBLIC_JUPITER_API_KEY` - **Required** Jupiter API key (get free key from [portal.jup.ag](https://portal.jup.ag))
 
 4. **Run the development server**
 
@@ -198,6 +202,46 @@ Detailed step-by-step guides are available in the `tutorials/` directory. These 
 | `NEXT_PUBLIC_PORTAL_URL` | Lazorkit portal URL | `https://portal.lazor.sh` |
 | `NEXT_PUBLIC_PAYMASTER_URL` | Paymaster service URL | `https://kora.devnet.lazorkit.com` |
 | `NEXT_PUBLIC_PAYMASTER_API_KEY` | Paymaster API key (optional) | - |
+| `NEXT_PUBLIC_JUPITER_API_KEY` | Jupiter API key (required for swaps) | - |
+
+> **Jupiter API Key**: Get your free API key from [portal.jup.ag](https://portal.jup.ag). The free tier provides 60 requests per minute. This project uses the latest Jupiter API (`api.jup.ag/swap/v1`) which requires an API key.
+
+### Jupiter API Integration
+
+This project uses the **latest Jupiter API** (`api.jup.ag/swap/v1`) with API key authentication:
+
+- **Modern API**: Migrated from the deprecated `quote-api.jup.ag/v6` to the new `api.jup.ag/swap/v1` endpoint
+- **API Key Required**: Get your free API key from [portal.jup.ag](https://portal.jup.ag)
+- **Free Tier**: 60 requests per minute (perfect for development and testing)
+- **Direct Client Calls**: No proxy needed - Jupiter API supports CORS for authenticated requests
+- **Features**:
+  - Real-time swap quotes
+  - Multi-hop route optimization
+  - Automatic slippage protection
+  - Best price routing across all DEXs
+
+**Setup:**
+1. Visit [portal.jup.ag](https://portal.jup.ag) and connect with email
+2. Generate a free API key
+3. Add it to your `.env.local` file as `NEXT_PUBLIC_JUPITER_API_KEY`
+
+### Network Switching
+
+The application includes a network switcher in the top-right corner of every page that allows you to toggle between **Devnet** and **Mainnet**:
+
+- **Devnet**: Default network for testing. Uses test tokens and free faucet SOL.
+- **Mainnet**: Production network with real SOL and tokens.
+
+**How it works:**
+- The network setting is persisted in `localStorage` and survives page refreshes
+- Switching networks automatically updates:
+  - RPC endpoints
+  - Paymaster service URLs
+  - Token mint addresses (USDC, USDT, etc.)
+  - Solana Explorer links
+  - All wallet operations
+
+**Note**: When switching networks, you'll need to reconnect your wallet as the smart wallet addresses are network-specific.
 
 ### Using Your Own RPC
 
@@ -310,6 +354,8 @@ MIT License - feel free to use this as a starter template for your own projects.
 - [Lazorkit Telegram](https://t.me/lazorkit)
 - [Solana Documentation](https://docs.solana.com)
 - [Jupiter Aggregator](https://jup.ag)
+- [Jupiter API Portal](https://portal.jup.ag) - Get your free API key
+- [Jupiter API Documentation](https://dev.jup.ag/docs/apis/swap-api)
 
 ## Bounty Submission
 

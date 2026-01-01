@@ -10,17 +10,19 @@
 import { useState } from "react";
 import { useLazorkitWallet } from "@/lib/hooks/useLazorkitWallet";
 import { EXPLORER_URLS } from "@/lib/config/lazorkit";
+import { useWalletStore } from "@/lib/store/walletStore";
 import { FaucetButton } from "./FaucetButton";
 import toast from "react-hot-toast";
 
 export function WalletInfo() {
   const { wallet, smartWalletAddress, balance } = useLazorkitWallet();
+  const network = useWalletStore((state) => state.network);
   const [addressCopied, setAddressCopied] = useState(false);
 
   if (!wallet) return null;
 
   const explorerUrl = smartWalletAddress
-    ? `${EXPLORER_URLS.devnet}/address/${smartWalletAddress}?cluster=devnet`
+    ? `${EXPLORER_URLS[network]}/address/${smartWalletAddress}${network === "devnet" ? "?cluster=devnet" : ""}`
     : null;
 
   const copyAddress = async () => {
@@ -71,7 +73,7 @@ export function WalletInfo() {
             </div>
           </div>
           <p className="mt-2.5 text-xs text-gray-500">
-            This is your Solana wallet address on Devnet. Use this to receive test funds.
+            This is your Solana wallet address on {network === "mainnet" ? "Mainnet" : "Devnet"}. {network === "devnet" ? "Use this to receive test funds." : "Use this to receive real SOL and tokens."}
           </p>
         </div>
 
@@ -84,11 +86,18 @@ export function WalletInfo() {
               {balance !== null ? `${balance.toFixed(4)} ` : "Loading..."}
               {balance !== null && <span className="text-lg font-semibold text-gray-600">SOL</span>}
             </p>
-            <FaucetButton />
+            {network === "devnet" && <FaucetButton />}
           </div>
-          <p className="mt-2.5 text-xs text-gray-500">
-            Need test SOL? Click the button above to get free Devnet SOL from the faucet.
-          </p>
+          {network === "devnet" && (
+            <p className="mt-2.5 text-xs text-gray-500">
+              Need test SOL? Click the button above to get free Devnet SOL from the faucet.
+            </p>
+          )}
+          {network === "mainnet" && (
+            <p className="mt-2.5 text-xs text-gray-500">
+              This is your Mainnet balance. Use real SOL for transactions.
+            </p>
+          )}
         </div>
 
         <div>

@@ -58,6 +58,21 @@ export function useLazorkitWallet() {
   const prevWalletRef = useRef(lazorkitWallet);
   const prevPubkeyRef = useRef(lazorkitSmartWalletPubkey?.toString());
 
+  // Initial sync on mount - ensure state is synced immediately after network switch
+  useEffect(() => {
+    // Sync immediately on mount to catch any existing connection state
+    // This is especially important after network switches when the provider remounts
+    setConnected(lazorkitIsConnected);
+    setConnecting(lazorkitIsConnecting);
+    if (lazorkitWallet) {
+      setWallet(lazorkitWallet);
+    }
+    if (lazorkitSmartWalletPubkey) {
+      setSmartWalletAddress(lazorkitSmartWalletPubkey.toString());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount - we want to capture initial state
+
   // Sync Lazorkit state with Zustand store
   // Only update when lazorkitWallet values change (not store values)
   useEffect(() => {
@@ -99,7 +114,9 @@ export function useLazorkitWallet() {
     if (!address) return;
 
     try {
-      const connection = new Connection(config.RPC_URL, {
+      // Get fresh config based on current network
+      const currentConfig = getLazorkitConfig(network);
+      const connection = new Connection(currentConfig.RPC_URL, {
         commitment: "confirmed",
         // Add timeout to prevent hanging requests
         httpHeaders: {
@@ -122,7 +139,7 @@ export function useLazorkitWallet() {
         toast.error("Failed to fetch balance");
       }
     }
-  }, [lazorkitSmartWalletPubkey, setBalance]);
+  }, [lazorkitSmartWalletPubkey, setBalance, network]);
 
   // Fetch balance when wallet connects (use lazorkitWallet values directly)
   useEffect(() => {
@@ -140,7 +157,13 @@ export function useLazorkitWallet() {
   const connect = async () => {
     try {
       setConnecting(true);
-      const walletInfo = await lazorkitConnect({ feeMode: "paymaster" });
+      // Use network-specific config for connection
+      const walletInfo = await lazorkitConnect({
+        rpcUrl: config.RPC_URL,
+        portalUrl: config.PORTAL_URL,
+        paymasterConfig: config.PAYMASTER,
+        feeMode: "paymaster",
+      });
       setWallet(walletInfo);
       toast.success("Wallet connected successfully!");
       return walletInfo;
