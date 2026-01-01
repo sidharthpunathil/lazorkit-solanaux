@@ -8,6 +8,25 @@ This guide walks you through deploying the Lazorkit Solana UX Examples to Vercel
 - A Vercel account (sign up at [vercel.com](https://vercel.com))
 - Your code pushed to a GitHub repository
 
+## How the Build Process Works
+
+When you deploy to Vercel, the build process automatically handles both the SDK and your Next.js app:
+
+1. **Installs dependencies** (`npm install`)
+   - Installs `@lazorkit/wallet` from GitHub (`git+https://github.com/lazor-kit/lazor-kit.git#main`)
+   - Runs `postinstall` script which builds the SDK from source
+
+2. **Builds the SDK** (via `postinstall` and `prebuild` scripts)
+   - Installs SDK dependencies
+   - Builds the TypeScript SDK to JavaScript
+   - Configures the package.json to point to built files
+
+3. **Builds Next.js** (`npm run build`)
+   - The `prebuild` script ensures SDK is built first (as a safety check)
+   - Then Next.js builds your application
+
+**You don't need to do anything manually** - both builds happen automatically! The `postinstall` and `prebuild` scripts ensure the SDK is ready before Next.js tries to use it.
+
 ## Step 1: Push Code to GitHub
 
 If you haven't already, push your code to GitHub:
@@ -45,9 +64,10 @@ git push -u origin main
 3. **Configure Project Settings**
    - **Framework Preset**: Next.js (auto-detected)
    - **Root Directory**: `./` (default)
-   - **Build Command**: `bun run build` (or `npm run build` if not using Bun)
+   - **Build Command**: `npm run build` (automatically builds SDK first via `prebuild` script)
    - **Output Directory**: `.next` (default)
-   - **Install Command**: `bun install` (or `npm install`)
+   - **Install Command**: `npm install` (automatically builds SDK via `postinstall` script)
+   - **Note**: The SDK from GitHub will be automatically built during installation and before the Next.js build
 
 4. **Add Environment Variables**
    - Click "Environment Variables"
@@ -150,8 +170,20 @@ Fix any errors before deploying.
 **Solution**: Make sure all dependencies are in `package.json`:
 
 ```bash
-bun install
+npm install
 ```
+
+### Build Fails: "@lazorkit/wallet" Module Not Found
+
+**Solution**: The SDK is installed from GitHub and needs to be built. This happens automatically:
+
+1. **During `npm install`**: The `postinstall` script automatically builds the SDK
+2. **Before `npm run build`**: The `prebuild` script ensures the SDK is built
+
+If the build still fails:
+- Check that `node_modules/@lazorkit/wallet/packages/ts-sdk/dist/` exists
+- Manually run: `npm run build:sdk` to build the SDK
+- Ensure the GitHub repository is accessible (no authentication required for public repos)
 
 ### Runtime Error: "WebAuthn not supported"
 
