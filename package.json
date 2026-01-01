@@ -19,7 +19,7 @@
     "@lazorkit/wallet": "^2.0.1",
     "@solana/web3.js": "^1.95.8",
     "@solana/spl-token": "^0.4.8",
-    "@coral-xyz/anchor": "^0.30.1",
+    "@coral-xyz/anchor": "^0.31.1",
     "next": "^16.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
