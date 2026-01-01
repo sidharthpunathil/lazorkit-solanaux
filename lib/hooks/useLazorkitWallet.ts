@@ -9,6 +9,7 @@
  * - Balance fetching on connection
  * - Error handling and loading states
  * - Type-safe wallet operations
+ * - Direct access to signMessage and verifyMessage (available in new kit)
  */
 
 import { useEffect, useCallback, useRef } from "react";
@@ -24,16 +25,14 @@ export function useLazorkitWallet() {
     connect: lazorkitConnect,
     disconnect: lazorkitDisconnect,
     signAndSendTransaction: lazorkitSignAndSendTransaction,
+    signMessage: lazorkitSignMessage,
+    verifyMessage: lazorkitVerifyMessage,
     isConnected: lazorkitIsConnected,
     isConnecting: lazorkitIsConnecting,
+    isSigning: lazorkitIsSigning,
     wallet: lazorkitWallet,
     smartWalletPubkey: lazorkitSmartWalletPubkey,
-  } = lazorkitWalletHook;
-  
-  // signMessage is available in the SDK source code but may not be in npm package @lazorkit/wallet@1.8.4
-  // Try to access it from the hook return value
-  const lazorkitSignMessage = (lazorkitWalletHook as any)?.signMessage as
-    ((message: string) => Promise<{ signature: string; signedPayload: string }>) | undefined;
+  } = lazorkitWalletHook as any; // Type assertion needed for new kit features
   
   const {
     isConnected,
@@ -137,7 +136,6 @@ export function useLazorkitWallet() {
   const connect = async () => {
     try {
       setConnecting(true);
-      // @ts-expect-error - Lazorkit SDK types may vary
       const walletInfo = await lazorkitConnect({ feeMode: "paymaster" });
       setWallet(walletInfo);
       toast.success("Wallet connected successfully!");
@@ -169,32 +167,19 @@ export function useLazorkitWallet() {
    * Sign a message with passkey
    * Useful for authentication without sending transactions
    * 
-   * Note: This feature may not be available in @lazorkit/wallet@1.8.4
-   * Check isSignMessageAvailable before calling this function
+   * Note: signMessage is available in the new lazor-kit SDK
    */
   const signMessage = async (message: string) => {
     if (!isConnected) {
       throw new Error("Wallet not connected");
     }
 
-    // Check if signMessage is available - the npm package @lazorkit/wallet@1.8.4 
-    // may not include signMessage even though the source code has it
-    let signMessageFn = lazorkitSignMessage;
-    
-    // Try to access it directly from the hook if not found
-    if (!signMessageFn && lazorkitWalletHook) {
-      signMessageFn = (lazorkitWalletHook as any)?.signMessage;
-    }
-
-    if (!signMessageFn || typeof signMessageFn !== 'function') {
-      throw new Error(
-        "signMessage is not available in this SDK version. " +
-        "Please use signAndSendTransaction for on-chain operations."
-      );
+    if (!lazorkitSignMessage) {
+      throw new Error("signMessage is not available. Please ensure you're using the latest @lazorkit/wallet SDK.");
     }
 
     try {
-      const result = await signMessageFn(message);
+      const result = await lazorkitSignMessage(message);
       toast.success("Message signed successfully!");
       return result;
     } catch (error: any) {
@@ -204,10 +189,33 @@ export function useLazorkitWallet() {
     }
   };
 
+  /**
+   * Verify a message signature
+   * Useful for verifying message authenticity
+   */
+  const verifyMessage = async (args: {
+    signedPayload: Uint8Array;
+    signature: Uint8Array;
+    publicKey: Uint8Array;
+  }): Promise<boolean> => {
+    if (!lazorkitVerifyMessage) {
+      throw new Error("verifyMessage is not available. Please ensure you're using the latest @lazorkit/wallet SDK.");
+    }
+
+    try {
+      return await lazorkitVerifyMessage(args);
+    } catch (error: any) {
+      console.error("Verify message failed:", error);
+      toast.error(error?.message || "Failed to verify message");
+      throw error;
+    }
+  };
+
   return {
     // State
     isConnected,
     isConnecting,
+    isSigning: lazorkitIsSigning,
     wallet,
     smartWalletAddress,
     balance,
@@ -216,7 +224,8 @@ export function useLazorkitWallet() {
     connect,
     disconnect,
     signMessage: lazorkitSignMessage ? signMessage : undefined,
-    isSignMessageAvailable: !!lazorkitSignMessage,
+    verifyMessage: lazorkitVerifyMessage ? verifyMessage : undefined,
+    isSignMessageAvailable: !!lazorkitSignMessage && typeof lazorkitSignMessage === 'function',
     signAndSendTransaction: lazorkitSignAndSendTransaction as any,
     fetchBalance,
 
@@ -225,9 +234,11 @@ export function useLazorkitWallet() {
       connect: lazorkitConnect,
       disconnect: lazorkitDisconnect,
       signMessage: lazorkitSignMessage,
+      verifyMessage: lazorkitVerifyMessage,
       signAndSendTransaction: lazorkitSignAndSendTransaction,
       isConnected: lazorkitIsConnected,
       isConnecting: lazorkitIsConnecting,
+      isSigning: lazorkitIsSigning,
       wallet: lazorkitWallet,
       smartWalletPubkey: lazorkitSmartWalletPubkey,
     },

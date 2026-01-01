@@ -48,14 +48,15 @@ export default function PasskeyLoginPage() {
     }
 
     if (!signMessage) {
-      alert("Sign message feature is not available in this SDK version. Please use gasless transfer or token swap for on-chain operations.");
+      alert("Sign message feature is not available. Please ensure you're using the latest @lazorkit/wallet SDK.");
       return;
     }
 
     setIsSigning(true);
     try {
       const result = await signMessage(messageToSign);
-      setSignature(result.signature);
+      // Display both signature and signedPayload for verification
+      setSignature(`${result.signature}\n\nSigned Payload: ${result.signedPayload}`);
     } catch (error) {
       console.error("Failed to sign message:", error);
     } finally {
@@ -106,62 +107,47 @@ export default function PasskeyLoginPage() {
           <>
             <WalletInfo />
 
-            {isSignMessageAvailable && signMessage ? (
-              <div className="bg-card rounded-lg border border-border shadow-sm p-6 mb-6">
-                <h2 className="text-2xl font-semibold mb-4 text-foreground">Sign Message</h2>
-                <p className="text-muted-foreground mb-6">
-                  Test message signing with your passkey. This is useful for
-                  authentication without sending transactions.
-                </p>
+            <div className="bg-card rounded-lg border border-border shadow-sm p-6 mb-6">
+              <h2 className="text-2xl font-semibold mb-4 text-foreground">Sign Message</h2>
+              <p className="text-muted-foreground mb-6">
+                Test message signing with your passkey. This is useful for
+                authentication without sending transactions. The signature uses WebAuthn P256 curve.
+              </p>
 
-                <div className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">
-                      Message to Sign
-                    </label>
-                    <input
-                      type="text"
-                      value={messageToSign}
-                      onChange={(e) => setMessageToSign(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-foreground placeholder:text-muted-foreground"
-                      placeholder="Enter message to sign"
-                    />
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    Message to Sign
+                  </label>
+                  <input
+                    type="text"
+                    value={messageToSign}
+                    onChange={(e) => setMessageToSign(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-foreground placeholder:text-muted-foreground"
+                    placeholder="Enter message to sign"
+                  />
+                </div>
+
+                <button
+                  onClick={handleSignMessage}
+                  disabled={isSigning || !messageToSign || !signMessage}
+                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-lg font-semibold hover:from-purple-500 hover:to-purple-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-500/20"
+                >
+                  {isSigning ? "Signing..." : "Sign Message"}
+                </button>
+
+                {signature && (
+                  <div className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                    <p className="text-sm font-medium text-green-400 mb-2">
+                      Message Signed Successfully
+                    </p>
+                    <code className="text-xs text-green-400/80 break-all font-mono whitespace-pre-wrap">
+                      {signature}
+                    </code>
                   </div>
-
-                  <button
-                    onClick={handleSignMessage}
-                    disabled={isSigning || !messageToSign}
-                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-lg font-semibold hover:from-purple-500 hover:to-purple-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-500/20"
-                  >
-                    {isSigning ? "Signing..." : "Sign Message"}
-                  </button>
-
-                  {signature && (
-                    <div className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                      <p className="text-sm font-medium text-green-400 mb-2">
-                        Message Signed Successfully
-                      </p>
-                      <code className="text-xs text-green-400/80 break-all font-mono">
-                        {signature}
-                      </code>
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
-            ) : (
-              <div className="bg-card rounded-lg border border-border shadow-sm p-6 mb-6">
-                <h2 className="text-2xl font-semibold mb-4 text-foreground">Sign Message</h2>
-                <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                  <p className="text-sm text-blue-400 mb-2">
-                    <strong>Feature Not Available</strong>
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    The signMessage feature is not available in @lazorkit/wallet@1.8.4.
-                    For on-chain operations, use the gasless transfer or token swap features instead.
-                  </p>
-                </div>
-              </div>
-            )}
+            </div>
 
             <InfoCard
               title="Session Persistence"
