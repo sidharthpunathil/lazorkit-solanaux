@@ -496,7 +496,10 @@ This project includes a subscription service demo. Here's where to find the code
 2. **Transfer Hook Integration**: Uses [`lib/hooks/useGaslessTransfer.ts`](../../lib/hooks/useGaslessTransfer.ts)
    - Uses `transferToken()` for subscription charges
    - Gasless execution via Lazorkit paymaster
-   - Network-aware token mints
+   - Network-aware token mints (devnet/mainnet)
+   - Smart wallet (PDA) support with `allowOwnerOffCurve: true`
+   - Comprehensive error handling for rate limits and network issues
+   - Transaction tracking with `lastTransaction` state
 
 3. **Wallet Hook**: Uses [`lib/hooks/useLazorkitWallet.ts`](../../lib/hooks/useLazorkitWallet.ts)
    - Wallet connection state
@@ -555,6 +558,7 @@ For a production subscription service, you would need:
 
 ```typescript
 import { useGaslessTransfer } from "@/lib/hooks/useGaslessTransfer";
+import toast from "react-hot-toast";
 
 function SubscriptionService() {
   const { transferToken, isTransferring } = useGaslessTransfer();
@@ -569,13 +573,21 @@ function SubscriptionService() {
       });
       
       console.log("Subscription charged:", signature);
+      toast.success(`Subscription charged successfully! Transaction: ${signature.slice(0, 8)}...`);
       // Update subscription lastCharge and nextCharge dates
-    } catch (error) {
+    } catch (error: any) {
       console.error("Charge failed:", error);
+      toast.error(error?.message || "Failed to charge subscription");
     }
   };
 }
 ```
+
+**Note:** The `transferToken` function in `useGaslessTransfer`:
+- Automatically uses network-aware USDC mint addresses (devnet/mainnet)
+- Handles smart wallet (PDA) addresses correctly with `allowOwnerOffCurve: true`
+- Includes comprehensive error handling for rate limits and network issues
+- Returns transaction signature for tracking
 
 ### Current Limitations
 

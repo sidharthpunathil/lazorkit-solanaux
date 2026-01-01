@@ -48,14 +48,26 @@ Create `lib/hooks/useTokenSwap.ts`:
 import { useState } from "react";
 import { useLazorkitWallet } from "./useLazorkitWallet";
 import { PublicKey, TransactionInstruction, Transaction } from "@solana/web3.js";
+import { JUPITER_API_KEY, JUPITER_API_BASE_URL } from "@/lib/config/lazorkit";
+import { useWalletStore } from "@/lib/store/walletStore";
 import toast from "react-hot-toast";
 
-// Common token mints on Devnet
+// Common token mints for both networks
 export const TOKEN_MINTS = {
-  SOL: "So11111111111111111111111111111111111111112", // Wrapped SOL
-  USDC: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU", // Devnet USDC
-  USDT: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", // Devnet USDT
+  devnet: {
+    SOL: "So11111111111111111111111111111111111111112", // Wrapped SOL (same on all networks)
+    USDC: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU", // Devnet USDC
+    USDT: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", // Devnet USDT
+  },
+  mainnet: {
+    SOL: "So11111111111111111111111111111111111111112", // Wrapped SOL
+    USDC: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // Mainnet USDC
+    USDT: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", // Mainnet USDT
+  },
 } as const;
+
+// Helper to get token mints for current network
+export const getTokenMints = (network: "devnet" | "mainnet") => TOKEN_MINTS[network];
 
 interface SwapQuote {
   inputMint: string;
@@ -69,6 +81,7 @@ interface SwapQuote {
 export function useTokenSwap() {
   const { signAndSendTransaction, smartWalletAddress, isConnected } =
     useLazorkitWallet();
+  const network = useWalletStore((state) => state.network);
   const [isFetchingQuote, setIsFetchingQuote] = useState(false);
   const [isSwapping, setIsSwapping] = useState(false);
   const [quote, setQuote] = useState<SwapQuote | null>(null);
@@ -83,8 +96,14 @@ export function useTokenSwap() {
     amount: number,
     slippageBps: number = 50 // 0.5% slippage
   ) => {
+    if (network === "devnet") {
+      throw new Error("Jupiter API only works on Solana Mainnet, not Devnet. Please switch to Mainnet to use token swaps.");
+    }
     if (!isConnected) {
       throw new Error("Wallet not connected");
+    }
+    if (!JUPITER_API_KEY) {
+      throw new Error("Jupiter API key is not configured. Please set NEXT_PUBLIC_JUPITER_API_KEY in your environment variables.");
     }
 
     setIsFetchingQuote(true);
@@ -92,24 +111,29 @@ export function useTokenSwap() {
 
     try {
       // Convert amount to smallest unit
-      const isSOL = inputMint === TOKEN_MINTS.SOL;
+      const tokenMints = getTokenMints(network);
+      const isSOL = inputMint === tokenMints.SOL;
       const amountInSmallestUnit = isSOL
         ? amount * 1_000_000_000 // SOL: 9 decimals
         : amount * 1_000_000; // USDC/USDT: 6 decimals
 
-      // Fetch quote from Jupiter API
-      const quoteUrl = new URL("https://quote-api.jup.ag/v6/quote");
+      // Fetch quote from Jupiter API (v6 with API key)
+      const quoteUrl = new URL("https://api.jup.ag/v6/quote");
       quoteUrl.searchParams.set("inputMint", inputMint);
       quoteUrl.searchParams.set("outputMint", outputMint);
       quoteUrl.searchParams.set("amount", amountInSmallestUnit.toString());
       quoteUrl.searchParams.set("slippageBps", slippageBps.toString());
       quoteUrl.searchParams.set("onlyDirectRoutes", "false");
+      quoteUrl.searchParams.set("asLegacyTransaction", "false"); // Use versioned transactions (V0)
+      quoteUrl.searchParams.set("restrictIntermediateTokens", "true"); // Use stable intermediate tokens
 
       const response = await fetch(quoteUrl.toString(), {
         method: "GET",
         headers: {
           Accept: "application/json",
+          "x-api-key": JUPITER_API_KEY, // Add Jupiter API key
         },
+        mode: "cors",
       });
 
       if (!response.ok) {
@@ -145,19 +169,26 @@ export function useTokenSwap() {
     outputMint: string,
     amount: number
   ) => {
+    if (network === "devnet") {
+      throw new Error("Jupiter API only works on Solana Mainnet, not Devnet. Please switch to Mainnet to use token swaps.");
+    }
     if (!isConnected || !smartWalletAddress || !quote) {
       throw new Error("Wallet not connected or quote not available");
+    }
+    if (!JUPITER_API_KEY) {
+      throw new Error("Jupiter API key is not configured. Please set NEXT_PUBLIC_JUPITER_API_KEY in your environment variables.");
     }
 
     setIsSwapping(true);
     setLastSwapSignature(null);
 
     try {
-      // Get swap transaction from Jupiter
-      const response = await fetch("https://quote-api.jup.ag/v6/swap", {
+      // Get swap transaction from Jupiter (v6 with API key)
+      const response = await fetch("https://api.jup.ag/v6/swap", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-api-key": JUPITER_API_KEY, // Add Jupiter API key
         },
         body: JSON.stringify({
           quoteResponse: quote,
@@ -188,6 +219,7 @@ export function useTokenSwap() {
         transactionOptions: {
           feeToken: "USDC", // Pay fees in USDC
           computeUnitLimit: 1_400_000, // Jupiter swaps can be compute-intensive
+          clusterSimulation: network === "devnet" ? "devnet" : "mainnet", // Simulate on correct cluster
         },
       });
 

@@ -32,10 +32,10 @@ Before you start, make sure you have:
 First, install the required packages:
 
 ```bash
-bun add @lazorkit/wallet @solana/web3.js buffer
-# or
-npm install @lazorkit/wallet @solana/web3.js buffer
+npm install @lazorkit/wallet@^2.0.1 @solana/web3.js buffer
 ```
+
+**Note:** This project uses `@lazorkit/wallet` version `2.0.1` from npm, which includes `signMessage` and `verifyMessage` support.
 
 ## Step 2: Configure Lazorkit
 
@@ -44,18 +44,44 @@ Create a configuration file to store your Lazorkit settings. This keeps everythi
 Create `lib/config/lazorkit.ts`:
 
 ```typescript
-export const LAZORKIT_CONFIG = {
-  RPC_URL: process.env.NEXT_PUBLIC_RPC_URL || "https://api.devnet.solana.com",
-  PORTAL_URL: process.env.NEXT_PUBLIC_PORTAL_URL || "https://portal.lazor.sh",
-  PAYMASTER: {
+import type { Network } from "@/lib/store/walletStore";
+
+export const NETWORK_CONFIG = {
+  devnet: {
+    rpcUrl: process.env.NEXT_PUBLIC_RPC_URL || "https://api.devnet.solana.com",
+    portalUrl: process.env.NEXT_PUBLIC_PORTAL_URL || "https://portal.lazor.sh",
     paymasterUrl: process.env.NEXT_PUBLIC_PAYMASTER_URL || "https://kora.devnet.lazorkit.com",
+    explorerUrl: "https://explorer.solana.com/?cluster=devnet",
+  },
+  mainnet: {
+    rpcUrl: process.env.NEXT_PUBLIC_RPC_URL || "https://api.mainnet-beta.solana.com",
+    portalUrl: process.env.NEXT_PUBLIC_PORTAL_URL || "https://portal.lazor.sh",
+    paymasterUrl: process.env.NEXT_PUBLIC_PAYMASTER_URL || "https://kora.mainnet.lazorkit.com",
+    explorerUrl: "https://explorer.solana.com",
   },
 } as const;
+
+export const getLazorkitConfig = (network: Network = "devnet") => {
+  const config = NETWORK_CONFIG[network];
+  return {
+    RPC_URL: config.rpcUrl,
+    PORTAL_URL: config.portalUrl,
+    PAYMASTER: {
+      paymasterUrl: config.paymasterUrl,
+      apiKey: process.env.NEXT_PUBLIC_PAYMASTER_API_KEY,
+    },
+    EXPLORER_URL: config.explorerUrl,
+  };
+};
+
+// Default config (for backward compatibility)
+export const LAZORKIT_CONFIG = getLazorkitConfig("devnet");
 ```
 
 **What's happening here?**
-- We're using environment variables with sensible defaults for Devnet
-- The `as const` makes the config type-safe
+- Network-aware configuration supporting both devnet and mainnet
+- Uses environment variables with sensible defaults
+- The `getLazorkitConfig` function returns network-specific settings
 - This works out of the box—no API keys needed for Devnet
 
 ## Step 3: Set up the provider
@@ -67,29 +93,44 @@ Update `app/layout.tsx`:
 ```typescript
 "use client";
 
+import type { ReactNode } from "react";
 import { LazorkitProvider } from "@lazorkit/wallet";
-import { LAZORKIT_CONFIG } from "@/lib/config/lazorkit";
+import { getLazorkitConfig } from "@/lib/config/lazorkit";
+import { useWalletStore } from "@/lib/store/walletStore";
 
 // Polyfill Buffer for client-side (required for Solana SDK)
 if (typeof window !== "undefined") {
   window.Buffer = window.Buffer || require("buffer").Buffer;
 }
 
+// Separate component to use hooks (can't use hooks directly in layout)
+function LazorkitProviderWrapper({ children }: { children: ReactNode }) {
+  const network = useWalletStore((state) => state.network);
+  const config = getLazorkitConfig(network);
+  
+  return (
+    <LazorkitProvider
+      key={network} // Force remount when network changes
+      rpcUrl={config.RPC_URL}
+      portalUrl={config.PORTAL_URL}
+      paymasterConfig={config.PAYMASTER}
+    >
+      {children as any}
+    </LazorkitProvider>
+  );
+}
+
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <html lang="en">
       <body>
-        <LazorkitProvider
-          rpcUrl={LAZORKIT_CONFIG.RPC_URL}
-          portalUrl={LAZORKIT_CONFIG.PORTAL_URL}
-          paymasterConfig={LAZORKIT_CONFIG.PAYMASTER}
-        >
+        <LazorkitProviderWrapper>
           {children}
-        </LazorkitProvider>
+        </LazorkitProviderWrapper>
       </body>
     </html>
   );
@@ -112,7 +153,7 @@ import { useEffect, useCallback, useRef } from "react";
 import { useWallet } from "@lazorkit/wallet";
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useWalletStore } from "@/lib/store/walletStore";
-import { LAZORKIT_CONFIG } from "@/lib/config/lazorkit";
+import { getLazorkitConfig } from "@/lib/config/lazorkit";
 import toast from "react-hot-toast";
 
 export function useLazorkitWallet() {
@@ -121,11 +162,14 @@ export function useLazorkitWallet() {
     connect: lazorkitConnect,
     disconnect: lazorkitDisconnect,
     signAndSendTransaction: lazorkitSignAndSendTransaction,
+    signMessage: lazorkitSignMessage,
+    verifyMessage: lazorkitVerifyMessage,
     isConnected: lazorkitIsConnected,
     isConnecting: lazorkitIsConnecting,
+    isSigning: lazorkitIsSigning,
     wallet: lazorkitWallet,
     smartWalletPubkey: lazorkitSmartWalletPubkey,
-  } = lazorkitWalletHook;
+  } = lazorkitWalletHook as any; // Type assertion needed for new kit features
 
   const {
     isConnected,
@@ -160,15 +204,22 @@ export function useLazorkitWallet() {
     setSmartWalletAddress,
   ]);
 
+  // Get network-aware config
+  const network = useWalletStore((state) => state.network);
+  const config = getLazorkitConfig(network);
+
   /**
    * Fetch SOL balance for the connected wallet
+   * Includes debouncing and error handling to prevent too many requests
    */
   const fetchBalance = useCallback(async () => {
     const address = lazorkitSmartWalletPubkey?.toString();
     if (!address) return;
 
     try {
-      const connection = new Connection(LAZORKIT_CONFIG.RPC_URL, {
+      // Get fresh config based on current network
+      const currentConfig = getLazorkitConfig(network);
+      const connection = new Connection(currentConfig.RPC_URL, {
         commitment: "confirmed",
       });
       const publicKey = new PublicKey(address);
@@ -176,13 +227,19 @@ export function useLazorkitWallet() {
       setBalance(balance / LAMPORTS_PER_SOL);
     } catch (error: any) {
       // Silently handle rate limiting (429) errors
-      if (error?.message?.includes("429") || error?.status === 429) {
+      const errorMessage = error?.message || "";
+      if (
+        errorMessage.includes("429") ||
+        error?.code === 429 ||
+        error?.status === 429 ||
+        errorMessage.includes("Too many requests")
+      ) {
         console.warn("RPC rate limited - balance update skipped");
         return;
       }
       console.error("Failed to fetch balance:", error);
     }
-  }, [lazorkitSmartWalletPubkey, setBalance]);
+  }, [lazorkitSmartWalletPubkey, setBalance, network]);
 
   // Fetch balance when wallet connects
   useEffect(() => {
@@ -195,11 +252,18 @@ export function useLazorkitWallet() {
 
   /**
    * Connect wallet with passkey authentication
+   * This triggers the biometric prompt (Face ID/Touch ID/Fingerprint)
+   * 
+   * Note: According to Lazorkit docs, connect() only takes { feeMode } option.
+   * The rpcUrl, portalUrl, and paymasterConfig are set in LazorkitProvider.
    */
   const connect = async () => {
     try {
       setConnecting(true);
-      const walletInfo = await lazorkitConnect({ feeMode: "paymaster" });
+      // Use network-specific config for connection
+      const walletInfo = await lazorkitConnect({
+        feeMode: "paymaster", // Only pass feeMode to connect, config is from provider
+      });
       setWallet(walletInfo);
       toast.success("Wallet connected successfully!");
       return walletInfo;
@@ -209,6 +273,54 @@ export function useLazorkitWallet() {
       throw error;
     } finally {
       setConnecting(false);
+    }
+  };
+
+  /**
+   * Sign a message with passkey
+   * Useful for authentication without sending transactions
+   * 
+   * Note: signMessage is available in @lazorkit/wallet v2.0.1+
+   */
+  const signMessage = async (message: string) => {
+    if (!isConnected) {
+      throw new Error("Wallet not connected");
+    }
+
+    if (!lazorkitSignMessage) {
+      throw new Error("signMessage is not available. Please ensure you're using @lazorkit/wallet v2.0.1+.");
+    }
+
+    try {
+      const result = await lazorkitSignMessage(message);
+      toast.success("Message signed successfully!");
+      return result;
+    } catch (error: any) {
+      console.error("Sign message failed:", error);
+      toast.error(error?.message || "Failed to sign message");
+      throw error;
+    }
+  };
+
+  /**
+   * Verify a message signature
+   * Useful for verifying message authenticity
+   */
+  const verifyMessage = async (args: {
+    signedPayload: Uint8Array;
+    signature: Uint8Array;
+    publicKey: Uint8Array;
+  }): Promise<boolean> => {
+    if (!lazorkitVerifyMessage) {
+      throw new Error("verifyMessage is not available. Please ensure you're using @lazorkit/wallet v2.0.1+.");
+    }
+
+    try {
+      return await lazorkitVerifyMessage(args);
+    } catch (error: any) {
+      console.error("Verify message failed:", error);
+      toast.error(error?.message || "Failed to verify message");
+      throw error;
     }
   };
 
@@ -230,6 +342,7 @@ export function useLazorkitWallet() {
     // State
     isConnected,
     isConnecting,
+    isSigning: lazorkitIsSigning,
     wallet,
     smartWalletAddress,
     balance,
@@ -237,6 +350,8 @@ export function useLazorkitWallet() {
     // Actions
     connect,
     disconnect,
+    signMessage: lazorkitSignMessage ? signMessage : undefined,
+    verifyMessage: lazorkitVerifyMessage ? verifyMessage : undefined,
     signAndSendTransaction: lazorkitSignAndSendTransaction as any,
     fetchBalance,
   };

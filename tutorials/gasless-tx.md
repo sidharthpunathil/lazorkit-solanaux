@@ -52,12 +52,14 @@ import {
   TransactionInstruction,
 } from "@solana/web3.js";
 import {
-  getAssociatedTokenAddress,
+  getAssociatedTokenAddressSync,
   createTransferInstruction,
   getAccount,
+  createAssociatedTokenAccountInstruction,
 } from "@solana/spl-token";
 import { Connection } from "@solana/web3.js";
-import { LAZORKIT_CONFIG, DEVNET_USDC_MINT } from "@/lib/config/lazorkit";
+import { getLazorkitConfig, DEVNET_USDC_MINT, MAINNET_USDC_MINT } from "@/lib/config/lazorkit";
+import { useWalletStore } from "@/lib/store/walletStore";
 import toast from "react-hot-toast";
 
 interface TransferOptions {
@@ -68,25 +70,88 @@ interface TransferOptions {
 }
 
 export function useGaslessTransfer() {
-  const { signAndSendTransaction, smartWalletAddress, isConnected } =
+  const { signAndSendTransaction, smartWalletAddress, isConnected, lazorkitWallet } =
     useLazorkitWallet();
+  const network = useWalletStore((state) => state.network);
   const [isTransferring, setIsTransferring] = useState(false);
   const [lastSignature, setLastSignature] = useState<string | null>(null);
+  const [lastTransaction, setLastTransaction] = useState<{
+    signature: string;
+    type: "SOL" | "USDC";
+    amount: number;
+    recipient: string;
+    network: "devnet" | "mainnet";
+  } | null>(null);
 
   /**
    * Transfer SOL gaslessly
    */
   const transferSOL = async (options: TransferOptions) => {
-    if (!isConnected || !smartWalletAddress) {
-      throw new Error("Wallet not connected");
+    if (!isConnected) {
+      throw new Error("Wallet not connected. Please connect your wallet to send SOL.");
+    }
+
+    // Get smart wallet address (Passkey Wallet)
+    const walletSmartWallet = lazorkitWallet?.wallet?.smartWallet;
+    const smartWalletPubkey = lazorkitWallet?.smartWalletPubkey;
+    
+    let effectiveSenderPubkey: PublicKey | null = null;
+    let effectiveWalletAddress: string | null = null;
+    
+    if (smartWalletPubkey) {
+      effectiveSenderPubkey = smartWalletPubkey;
+      effectiveWalletAddress = smartWalletPubkey.toBase58();
+    } else if (walletSmartWallet) {
+      effectiveWalletAddress = walletSmartWallet;
+      effectiveSenderPubkey = new PublicKey(walletSmartWallet);
+    } else if (smartWalletAddress) {
+      effectiveWalletAddress = smartWalletAddress;
+      effectiveSenderPubkey = new PublicKey(smartWalletAddress);
+    }
+
+    if (!effectiveWalletAddress || !effectiveSenderPubkey) {
+      throw new Error("Failed to get Passkey Wallet (smart wallet) address. Please reconnect your wallet.");
     }
 
     setIsTransferring(true);
     setLastSignature(null);
+    setLastTransaction(null);
 
     try {
-      const recipientPubkey = new PublicKey(options.recipient);
-      const senderPubkey = new PublicKey(smartWalletAddress);
+      // Validate recipient address
+      let recipientPubkey: PublicKey;
+      let recipientAddress: string;
+      try {
+        recipientPubkey = new PublicKey(options.recipient.trim());
+        recipientAddress = recipientPubkey.toBase58();
+        
+        // Verify it's a valid on-curve address (required for SOL transfers)
+        if (!PublicKey.isOnCurve(recipientPubkey)) {
+          throw new Error("Recipient address is not a valid on-curve Solana address. SOL can only be sent to on-curve addresses.");
+        }
+      } catch (error: any) {
+        if (error.message?.includes("on-curve")) {
+          throw error;
+        }
+        throw new Error(`Invalid recipient address: ${options.recipient}. ${error.message}`);
+      }
+
+      // Prevent sending to yourself
+      if (recipientAddress === effectiveWalletAddress) {
+        throw new Error("Cannot send SOL to your own address. Please use a different recipient address.");
+      }
+
+      // Validate recipient is not a token mint address
+      const USDC_MINT_MAINNET = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+      const USDC_MINT_DEVNET = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU";
+      if (recipientAddress === USDC_MINT_MAINNET || recipientAddress === USDC_MINT_DEVNET) {
+        throw new Error(
+          `Invalid recipient address: "${recipientAddress}" is a token mint address, not a wallet address. ` +
+          `You cannot send SOL to a token mint. Please enter a valid Solana wallet address (starts with a letter, 32-44 characters).`
+        );
+      }
+
+      const senderPubkey = effectiveSenderPubkey;
       const amountLamports = options.amount * LAMPORTS_PER_SOL;
 
       // Create transfer instruction
@@ -101,11 +166,19 @@ export function useGaslessTransfer() {
         instructions: [instruction],
         transactionOptions: {
           feeToken: options.feeToken === "USDC" ? "USDC" : undefined,
+          clusterSimulation: network === "devnet" ? "devnet" : "mainnet",
         },
       });
 
       setLastSignature(signature);
-      toast.success(`Transfer successful! ${signature.slice(0, 8)}...`);
+      setLastTransaction({
+        signature,
+        type: "SOL",
+        amount: options.amount,
+        recipient: recipientAddress,
+        network,
+      });
+      toast.success(`Successfully sent ${options.amount} SOL! Transaction: ${signature.slice(0, 8)}...`);
       return signature;
     } catch (error: any) {
       console.error("Transfer failed:", error);
@@ -120,29 +193,62 @@ export function useGaslessTransfer() {
    * Transfer SPL tokens (like USDC) gaslessly
    */
   const transferToken = async (options: TransferOptions) => {
-    if (!isConnected || !smartWalletAddress) {
-      throw new Error("Wallet not connected");
+    if (!isConnected) {
+      throw new Error("Wallet not connected. Please connect your wallet to send tokens.");
+    }
+
+    // Get smart wallet address (Passkey Wallet)
+    const walletSmartWallet = lazorkitWallet?.wallet?.smartWallet;
+    const smartWalletPubkey = lazorkitWallet?.smartWalletPubkey;
+    
+    let effectiveSenderPubkey: PublicKey | null = null;
+    let effectiveWalletAddress: string | null = null;
+    
+    if (smartWalletPubkey) {
+      effectiveSenderPubkey = smartWalletPubkey;
+      effectiveWalletAddress = smartWalletPubkey.toBase58();
+    } else if (walletSmartWallet) {
+      effectiveWalletAddress = walletSmartWallet;
+      effectiveSenderPubkey = new PublicKey(walletSmartWallet);
+    } else if (smartWalletAddress) {
+      effectiveWalletAddress = smartWalletAddress;
+      effectiveSenderPubkey = new PublicKey(smartWalletAddress);
+    }
+
+    if (!effectiveWalletAddress || !effectiveSenderPubkey) {
+      throw new Error("Failed to get Passkey Wallet (smart wallet) address. Please reconnect your wallet.");
     }
 
     setIsTransferring(true);
     setLastSignature(null);
+    setLastTransaction(null);
 
     try {
-      const connection = new Connection(LAZORKIT_CONFIG.RPC_URL, {
+      const config = getLazorkitConfig(network);
+      const connection = new Connection(config.RPC_URL, {
         commitment: "confirmed",
       });
-      const tokenMint = new PublicKey(options.tokenMint || DEVNET_USDC_MINT);
-      const senderPubkey = new PublicKey(smartWalletAddress);
-      const recipientPubkey = new PublicKey(options.recipient);
+      
+      // Use network-specific USDC mint
+      const usdcMint = network === "mainnet" ? MAINNET_USDC_MINT : DEVNET_USDC_MINT;
+      const tokenMint = new PublicKey(options.tokenMint || usdcMint);
+      const senderPubkey = effectiveSenderPubkey;
+      const recipientPubkey = new PublicKey(options.recipient.trim());
 
       // Get associated token addresses
-      const senderATA = await getAssociatedTokenAddress(
+      // Smart wallets are PDAs (off-curve), so we need allowOwnerOffCurve: true for sender
+      const senderIsOnCurve = PublicKey.isOnCurve(senderPubkey);
+      const senderATA = getAssociatedTokenAddressSync(
         tokenMint,
-        senderPubkey
+        senderPubkey,
+        !senderIsOnCurve // allowOwnerOffCurve: true if off-curve (smart wallet)
       );
-      const recipientATA = await getAssociatedTokenAddress(
+      
+      const recipientIsOnCurve = PublicKey.isOnCurve(recipientPubkey);
+      const recipientATA = getAssociatedTokenAddressSync(
         tokenMint,
-        recipientPubkey
+        recipientPubkey,
+        !recipientIsOnCurve // allowOwnerOffCurve: true if off-curve (smart wallet)
       );
 
       let instructions: TransactionInstruction[] = [];
@@ -152,9 +258,6 @@ export function useGaslessTransfer() {
         await getAccount(connection, recipientATA);
       } catch {
         // Create token account if it doesn't exist
-        const {
-          createAssociatedTokenAccountInstruction,
-        } = await import("@solana/spl-token");
         instructions.push(
           createAssociatedTokenAccountInstruction(
             senderPubkey,
@@ -179,12 +282,20 @@ export function useGaslessTransfer() {
       const signature = await (signAndSendTransaction as any)({
         instructions,
         transactionOptions: {
-          feeToken: "USDC", // Pay fees in USDC
+          feeToken: options.feeToken || "USDC", // Pay fees in USDC
+          clusterSimulation: network, // Use current network for simulation
         },
       });
 
       setLastSignature(signature);
-      toast.success(`Transfer successful! ${signature.slice(0, 8)}...`);
+      setLastTransaction({
+        signature,
+        type: "USDC",
+        amount: options.amount,
+        recipient: options.recipient.trim(),
+        network,
+      });
+      toast.success(`Successfully sent ${options.amount} tokens! Transaction: ${signature.slice(0, 8)}...`);
       return signature;
     } catch (error: any) {
       console.error("Token transfer failed:", error);
@@ -200,6 +311,7 @@ export function useGaslessTransfer() {
     transferToken,
     isTransferring,
     lastSignature,
+    lastTransaction,
   };
 }
 ```
@@ -478,9 +590,10 @@ This project includes a complete gasless transfer implementation. Here's where t
    - Success/error feedback
 
 4. **Transaction Status Component**: [`components/TransactionStatus.tsx`](../../components/TransactionStatus.tsx)
-   - Displays transaction signature
-   - Links to Solana Explorer
-   - Success messaging
+   - Displays detailed transaction information (type, amount, recipient, network)
+   - Shows full transaction signature
+   - Network-aware explorer links (devnet/mainnet)
+   - Success messaging with all transaction details
 
 5. **Configuration**: [`lib/config/lazorkit.ts`](../../lib/config/lazorkit.ts)
    - Network-specific USDC mint addresses
@@ -508,9 +621,10 @@ This project includes a complete gasless transfer implementation. Here's where t
 
 ```typescript
 import { useGaslessTransfer } from "@/lib/hooks/useGaslessTransfer";
+import { TransactionStatus } from "@/components/TransactionStatus";
 
 function MyComponent() {
-  const { transferSOL, transferToken, isTransferring } = useGaslessTransfer();
+  const { transferSOL, transferToken, isTransferring, lastSignature, lastTransaction } = useGaslessTransfer();
 
   const handleSendSOL = async () => {
     try {
@@ -520,10 +634,23 @@ function MyComponent() {
         feeToken: "USDC", // Pay fees in USDC
       });
       console.log("Transaction:", signature);
+      // lastTransaction will contain: { signature, type: "SOL", amount: 0.1, recipient: "...", network: "devnet" }
     } catch (error) {
       console.error("Transfer failed:", error);
     }
   };
+
+  return (
+    <div>
+      {/* Your transfer form */}
+      {lastSignature && (
+        <TransactionStatus 
+          signature={lastSignature} 
+          transaction={lastTransaction || undefined}
+        />
+      )}
+    </div>
+  );
 }
 ```
 
