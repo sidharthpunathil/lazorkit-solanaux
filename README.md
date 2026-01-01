@@ -4,6 +4,8 @@
 
 Built for the [Lazorkit Bounty](https://earn.superteam.fun/listing/integrate-passkey-technology-with-lazorkit-to-10x-solana-ux) by Superteam Vietnam.
 
+![Landing Page](./assets/landing-page.png)
+
 ## Overview
 
 This repository provides a production-ready example of integrating Lazorkit SDK with Next.js to create a seamless Solana Web3 experience. It demonstrates:
@@ -48,6 +50,12 @@ This repository provides a production-ready example of integrating Lazorkit SDK 
 ## Quick Start
 
 > **Documentation**: Access documentation at `/docs` after starting both servers. See [Running the Application](#running-the-application) below.
+
+### VitePress Documentation
+
+The project includes comprehensive VitePress documentation with interactive guides and examples:
+
+![VitePress Documentation](./assets/docs.png)
 
 > **New to Smart Wallets?** Check out [SMART_WALLET_GUIDE.md](./SMART_WALLET_GUIDE.md) or the [Smart Wallet Guide in Docs](/docs/smart-wallet-guide) to learn:
 > - What a smart wallet is and how it's created
@@ -152,7 +160,9 @@ lazorkit-solanaux/
 
 ## Tutorials
 
-Detailed step-by-step guides are available in the `tutorials/` directory:
+Detailed step-by-step guides are available in the `tutorials/` directory. These comprehensive guides walk you through each feature with code examples and best practices:
+
+![Step-by-Step Guides](./assets/guides.png)
 
 - **[Passkey Wallet Setup](./tutorials/passkey-wallet.md)** - Complete guide to implementing passkey authentication
 - **[Gasless Transactions](./tutorials/gasless-tx.md)** - How to send tokens without SOL for fees

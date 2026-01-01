@@ -1,13 +1,13 @@
 /**
- * Home Page - Navigation Hub
+ * Home Page - Landing Page
  * 
- * Landing page that showcases all Lazorkit integration examples.
- * Clean, simple UI that guides users to different use cases.
+ * Landing page inspired by Lazorkit's official website.
+ * Features hero section, navigation, and use case showcase.
  */
 
 "use client";
 
-import { WalletStatus, UseCaseCard } from "@/components";
+import { Header, Hero, WalletStatus, UseCaseCard } from "@/components";
 import Link from "next/link";
 
 export default function Home() {
@@ -48,29 +48,28 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-6 py-12 lg:px-8">
-        {/* Header */}
-        <header className="mb-16 text-center">
-          <div className="mb-6">
-            <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-purple-400 via-purple-500 to-purple-600 bg-clip-text text-transparent">
-              Lazorkit Solana UX Examples
-            </h1>
-          </div>
-          <p className="text-xl text-muted-foreground mb-3 max-w-2xl mx-auto">
-            Passkey-powered, gasless Solana transactions
-          </p>
-          <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-            No seed phrases. No browser extensions. Just biometric authentication.
-          </p>
-        </header>
-
+      <Header />
+      <Hero />
+      
+      <div className="container mx-auto px-6 lg:px-8 py-16">
         <WalletStatus />
 
-        {/* Use Case Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {useCases.map((useCase) => (
-            <UseCaseCard key={useCase.href} {...useCase} />
-          ))}
+        {/* Use Case Cards Section */}
+        <div className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+              Explore Examples
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Learn how to integrate Lazorkit with practical, working examples
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {useCases.map((useCase) => (
+              <UseCaseCard key={useCase.href} {...useCase} />
+            ))}
+          </div>
         </div>
 
         {/* Footer */}

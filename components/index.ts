@@ -15,4 +15,6 @@ export { SwapInterface } from "./SwapInterface";
 export { InfoCard } from "./InfoCard";
 export { Navigation } from "./Navigation";
 export { FaucetButton } from "./FaucetButton";
+export { Header } from "./Header";
+export { Hero } from "./Hero";
 
