@@ -4,17 +4,26 @@ export default defineConfig({
   title: 'Lazorkit Solana UX Examples',
   description: 'Comprehensive documentation for building passkey-powered, gasless Solana applications',
   
+  // Build output directory - output to Next.js public folder
+  outDir: '../public/docs',
+  
+  // Base URL for serving from /docs route
+  base: '/docs/',
+  
   // Allow both light and dark mode (user can toggle)
   appearance: true,
+  
+  // Ignore dead links (some links are for dev/localhost)
+  ignoreDeadLinks: true,
   
   themeConfig: {
     logo: '/logo.png',
     
     nav: [
-      { text: 'Home', link: '/' },
-      { text: 'Getting Started', link: '/getting-started' },
-      { text: 'Tutorials', link: '/tutorials/passkey-wallet' },
-      { text: 'Live Demo', link: 'http://localhost:3000', target: '_blank' },
+      { text: 'Home', link: '/' }, // Link to Next.js home (outside docs)
+      { text: 'Getting Started', link: '/getting-started' }, // Relative to base (/docs/)
+      { text: 'Tutorials', link: '/tutorials/passkey-wallet' }, // Relative to base (/docs/)
+      { text: 'Live Demo', link: '/', target: '_self' }, // Link to Next.js app
     ],
 
     sidebar: {

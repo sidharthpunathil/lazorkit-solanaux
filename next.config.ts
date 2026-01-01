@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
     };
     return config;
   },
+  // Serve VitePress docs from public/docs
+  // Next.js automatically serves static files from public/ directory
+  // Files in public/docs/ will be accessible at /docs/*
 };
 
 export default nextConfig;

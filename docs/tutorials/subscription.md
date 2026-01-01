@@ -58,6 +58,6 @@ export function useSubscription() {
 ## Next Steps
 
 - Review [Smart Wallet Guide](/smart-wallet-guide)
-- Check out [Examples](http://localhost:3000)
+- Check out [Examples](https://lazorkit-solanaux.vercel.app)
 - Read [Lazorkit Documentation](https://docs.lazorkit.com/)
 

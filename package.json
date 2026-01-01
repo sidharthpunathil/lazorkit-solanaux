@@ -4,17 +4,17 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:with-docs": "concurrently \"next dev\" \"vitepress dev docs\"",
+    "dev:with-docs": "concurrently \"next dev\" \"npm run docs:dev\"",
     "build:sdk": "if [ -d 'node_modules/@lazorkit/wallet/packages/ts-sdk' ]; then cd node_modules/@lazorkit/wallet && npm install --no-save 2>/dev/null && cd packages/ts-sdk && npm install --no-save 2>/dev/null && npm run build 2>&1 | tail -3 && cd ../.. && node -e \"const fs=require('fs'); const pkg=JSON.parse(fs.readFileSync('packages/ts-sdk/package.json')); const rootPkg={name:'@lazorkit/wallet',version:pkg.version,description:pkg.description,main:'./packages/ts-sdk/dist/index.js',module:'./packages/ts-sdk/dist/index.mjs',types:'./packages/ts-sdk/dist/index.d.ts',exports:{'.':{types:'./packages/ts-sdk/dist/index.d.ts',require:'./packages/ts-sdk/dist/index.js',import:'./packages/ts-sdk/dist/index.mjs',default:'./packages/ts-sdk/dist/index.js'}},dependencies:pkg.dependencies,peerDependencies:pkg.peerDependencies}; fs.writeFileSync('package.json',JSON.stringify(rootPkg,null,2));\" 2>/dev/null; fi",
-    "prebuild": "npm run build:sdk",
+    "prebuild": "npm run build:sdk && npm run docs:build",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs",
+    "docs:dev": "node node_modules/vitepress/bin/vitepress.js dev docs",
+    "docs:build": "node node_modules/vitepress/bin/vitepress.js build docs",
+    "docs:preview": "node node_modules/vitepress/bin/vitepress.js preview docs",
     "postinstall": "npm run build:sdk"
   },
   "dependencies": {

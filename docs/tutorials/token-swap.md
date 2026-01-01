@@ -116,5 +116,5 @@ export function SwapInterface() {
 
 - Learn about [Subscription Service](/tutorials/subscription)
 - Check the [Smart Wallet Guide](/smart-wallet-guide)
-- Explore more [Examples](http://localhost:3000)
+- Explore more [Examples](https://lazorkit-solanaux.vercel.app)
 

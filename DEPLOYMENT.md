@@ -21,11 +21,15 @@ When you deploy to Vercel, the build process automatically handles both the SDK 
    - Builds the TypeScript SDK to JavaScript
    - Configures the package.json to point to built files
 
-3. **Builds Next.js** (`npm run build`)
-   - The `prebuild` script ensures SDK is built first (as a safety check)
+3. **Builds the Documentation** (via `prebuild` script)
+   - Builds VitePress docs to `public/docs/`
+   - Documentation is served as static files from `/docs` route
+
+4. **Builds Next.js** (`npm run build`)
+   - The `prebuild` script ensures SDK and docs are built first (as a safety check)
    - Then Next.js builds your application
 
-**You don't need to do anything manually** - both builds happen automatically! The `postinstall` and `prebuild` scripts ensure the SDK is ready before Next.js tries to use it.
+**You don't need to do anything manually** - all builds happen automatically! The `postinstall` and `prebuild` scripts ensure the SDK and docs are ready before Next.js tries to use them.
 
 ## Step 1: Push Code to GitHub
 

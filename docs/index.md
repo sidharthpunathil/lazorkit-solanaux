@@ -11,7 +11,7 @@ hero:
       link: /getting-started
     - theme: alt
       text: View Live Demo
-      link: http://localhost:3000
+      link: https://lazorkit-solanaux.vercel.app
 
 features:
   - title: Passkey Authentication
@@ -34,7 +34,7 @@ bun install
 # Run development server
 bun run dev
 
-# Open http://localhost:3000
+# Open http://localhost:3000 (or visit https://lazorkit-solanaux.vercel.app for the live demo)
 ```
 
 ## Features

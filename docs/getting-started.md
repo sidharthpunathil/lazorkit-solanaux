@@ -51,6 +51,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+> **Live Demo**: You can also try the live demo at [https://lazorkit-solanaux.vercel.app](https://lazorkit-solanaux.vercel.app) without setting up locally.
+
 ## First Steps
 
 1. **Connect Your Wallet**

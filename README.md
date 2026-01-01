@@ -4,6 +4,8 @@
 
 Built for the [Lazorkit Bounty](https://earn.superteam.fun/listing/integrate-passkey-technology-with-lazorkit-to-10x-solana-ux) by Superteam Vietnam.
 
+**Live Demo**: [https://lazorkit-solanaux.vercel.app](https://lazorkit-solanaux.vercel.app) | **Documentation**: [https://lazorkit-solanaux.vercel.app/docs](https://lazorkit-solanaux.vercel.app/docs)
+
 ![Landing Page](./assets/landing-page.png)
 
 ## Overview
@@ -59,11 +61,14 @@ This repository provides a production-ready example of integrating Lazorkit SDK 
 
 ## Quick Start
 
-> **Documentation**: Access documentation at `/docs` after starting both servers. See [Running the Application](#running-the-application) below.
+> **Documentation**: Access VitePress documentation at `/docs` after building. The docs are built into the Next.js app and served as static files from `public/docs/`.
 
 ### VitePress Documentation
 
-The project includes comprehensive VitePress documentation with interactive guides and examples:
+The project includes comprehensive VitePress documentation with interactive guides and examples. The documentation is accessible at `/docs` route:
+
+- **Local Development**: [http://localhost:3000/docs](http://localhost:3000/docs)
+- **Production**: [https://lazorkit-solanaux.vercel.app/docs](https://lazorkit-solanaux.vercel.app/docs)
 
 ![VitePress Documentation](./assets/docs.png)
 
@@ -114,26 +119,28 @@ The `.env.example` file contains all available environment variables with their 
 
 4. **Run the development server**
 
-**Option 1: Run both servers together (Recommended)**
-```bash
-bun run dev:with-docs
-```
-This starts both Next.js (port 3000) and VitePress docs (port 5173) simultaneously.
+4. **Build the documentation** (one-time setup or when docs change)
 
-**Option 2: Run separately**
 ```bash
-# Terminal 1: Next.js app
+npm run docs:build
+```
+
+This builds the VitePress docs into `public/docs/` which Next.js serves automatically.
+
+5. **Run the development server**
+
+```bash
 bun run dev
-
-# Terminal 2: VitePress docs  
-bun run docs:dev
+# or
+npm run dev
 ```
 
-5. **Open your browser**
+6. **Open your browser**
 
 - Main app: [http://localhost:3000](http://localhost:3000)
-- Documentation: [http://localhost:3000/docs](http://localhost:3000/docs) (redirects to VitePress)
-- Docs directly: [http://localhost:5173](http://localhost:5173)
+- **VitePress Documentation**: [http://localhost:3000/docs](http://localhost:3000/docs) - Serves the built VitePress docs from `public/docs/`
+
+> **Note**: The VitePress docs are built into the Next.js app at `public/docs/` and served via the `/docs` route. You don't need a separate VitePress server. Just run `npm run docs:build` when you update the documentation, then restart your Next.js dev server.
 
 ## Project Structure
 
@@ -301,7 +308,17 @@ The app is configured for Vercel deployment out of the box. See [DEPLOYMENT.md](
 3. Add environment variables (optional - defaults work for Devnet)
 4. Deploy!
 
-**Live Demo:** Once deployed, your app will be available at `https://your-project.vercel.app`
+**Note**: The VitePress documentation is automatically built during deployment via the `prebuild` script, which runs `docs:build` before `next build`. The built docs are output to `public/docs/` and served via the `/docs` route as static files.
+
+**Live Demo:** Once deployed, your app will be available at `https://your-project.vercel.app` with documentation at `https://your-project.vercel.app/docs`
+
+**Example Deployment**: 
+- **Live App**: [https://lazorkit-solanaux.vercel.app](https://lazorkit-solanaux.vercel.app)
+- **Documentation**: [https://lazorkit-solanaux.vercel.app/docs](https://lazorkit-solanaux.vercel.app/docs)
+
+**Example Deployment**: 
+- **Live App**: [https://lazorkit-solanaux.vercel.app](https://lazorkit-solanaux.vercel.app)
+- **Documentation**: [https://lazorkit-solanaux.vercel.app/docs](https://lazorkit-solanaux.vercel.app/docs)
 
 For detailed deployment instructions, troubleshooting, and best practices, see [DEPLOYMENT.md](./DEPLOYMENT.md).
 
@@ -349,6 +366,8 @@ MIT License - feel free to use this as a starter template for your own projects.
 
 ## Resources
 
+- **Live Demo**: [https://lazorkit-solanaux.vercel.app](https://lazorkit-solanaux.vercel.app)
+- **Documentation**: [https://lazorkit-solanaux.vercel.app/docs](https://lazorkit-solanaux.vercel.app/docs)
 - [Lazorkit Documentation](https://docs.lazorkit.com)
 - [Lazorkit GitHub](https://github.com/lazor-kit/lazor-kit)
 - [Lazorkit Telegram](https://t.me/lazorkit)

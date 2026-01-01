@@ -9,10 +9,13 @@
 
 import { useState } from "react";
 import { useLazorkitWallet } from "@/lib/hooks/useLazorkitWallet";
+import { useWalletStore } from "@/lib/store/walletStore";
+import { FaucetButton } from "./FaucetButton";
 import toast from "react-hot-toast";
 
 export function WalletStatus() {
   const { isConnected, smartWalletAddress, balance } = useLazorkitWallet();
+  const network = useWalletStore((state) => state.network);
   const [showFullAddress, setShowFullAddress] = useState(false);
 
   if (!isConnected || !smartWalletAddress) return null;
@@ -52,11 +55,14 @@ export function WalletStatus() {
           </div>
         </div>
         {balance !== null && (
-          <div className="text-right flex-shrink-0">
-            <p className="text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Balance</p>
-            <p className="text-2xl font-bold text-gray-900">
-              {balance.toFixed(4)} <span className="text-lg font-semibold text-gray-600">SOL</span>
-            </p>
+          <div className="flex-shrink-0">
+            <p className="text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide text-right">Balance</p>
+            <div className="flex items-center justify-end gap-3">
+              <p className="text-2xl font-bold text-gray-900">
+                {balance.toFixed(4)} <span className="text-lg font-semibold text-gray-600">SOL</span>
+              </p>
+              {network === "devnet" && <FaucetButton />}
+            </div>
           </div>
         )}
       </div>

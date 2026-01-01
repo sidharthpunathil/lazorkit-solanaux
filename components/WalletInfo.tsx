@@ -11,7 +11,6 @@ import { useState } from "react";
 import { useLazorkitWallet } from "@/lib/hooks/useLazorkitWallet";
 import { EXPLORER_URLS } from "@/lib/config/lazorkit";
 import { useWalletStore } from "@/lib/store/walletStore";
-import { FaucetButton } from "./FaucetButton";
 import toast from "react-hot-toast";
 
 export function WalletInfo() {
@@ -81,16 +80,15 @@ export function WalletInfo() {
           <label className="text-xs font-medium text-gray-500 mb-2.5 block uppercase tracking-wide">
             Balance
           </label>
-          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-between">
+          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
             <p className="text-2xl font-bold text-gray-900">
               {balance !== null ? `${balance.toFixed(4)} ` : "Loading..."}
               {balance !== null && <span className="text-lg font-semibold text-gray-600">SOL</span>}
             </p>
-            {network === "devnet" && <FaucetButton />}
           </div>
           {network === "devnet" && (
             <p className="mt-2.5 text-xs text-gray-500">
-              Need test SOL? Click the button above to get free Devnet SOL from the faucet.
+              This is your Devnet balance. Use test SOL for transactions.
             </p>
           )}
           {network === "mainnet" && (
