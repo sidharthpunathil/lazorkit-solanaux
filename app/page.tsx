@@ -57,10 +57,10 @@ export default function Home() {
         {/* Use Case Cards Section */}
         <div className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
               Explore Examples
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Learn how to integrate Lazorkit with practical, working examples
             </p>
           </div>
@@ -73,14 +73,14 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <footer className="text-center text-sm text-muted-foreground mt-16 pt-8 border-t border-border">
+        <footer className="text-center text-sm text-gray-500 mt-16 pt-8 border-t border-gray-200">
           <p>
             Built for the{" "}
             <a
               href="https://earn.superteam.fun/listing/integrate-passkey-technology-with-lazorkit-to-10x-solana-ux"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-accent hover:text-purple-400 transition-colors"
+              className="text-purple-600 hover:text-purple-700 transition-colors font-medium"
             >
               Lazorkit Bounty
             </a>
@@ -89,7 +89,7 @@ export default function Home() {
               href="https://docs.lazorkit.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-accent hover:text-purple-400 transition-colors"
+              className="text-purple-600 hover:text-purple-700 transition-colors font-medium"
             >
               Documentation
             </a>
@@ -98,7 +98,7 @@ export default function Home() {
               href="https://t.me/lazorkit"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-accent hover:text-purple-400 transition-colors"
+              className="text-purple-600 hover:text-purple-700 transition-colors font-medium"
             >
               Telegram
             </a>

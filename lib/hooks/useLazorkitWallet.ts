@@ -16,7 +16,7 @@ import { useEffect, useCallback, useRef } from "react";
 import { useWallet } from "@lazorkit/wallet";
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useWalletStore } from "@/lib/store/walletStore";
-import { LAZORKIT_CONFIG } from "@/lib/config/lazorkit";
+import { getLazorkitConfig } from "@/lib/config/lazorkit";
 import toast from "react-hot-toast";
 
 export function useLazorkitWallet() {
@@ -40,6 +40,7 @@ export function useLazorkitWallet() {
     wallet,
     smartWalletAddress,
     balance,
+    network,
     setConnecting,
     setConnected,
     setWallet,
@@ -47,6 +48,9 @@ export function useLazorkitWallet() {
     setBalance,
     reset,
   } = useWalletStore();
+  
+  // Get network-aware config
+  const config = getLazorkitConfig(network);
 
   // Use refs to track previous values and prevent unnecessary updates
   const prevConnectedRef = useRef(lazorkitIsConnected);
@@ -95,7 +99,7 @@ export function useLazorkitWallet() {
     if (!address) return;
 
     try {
-      const connection = new Connection(LAZORKIT_CONFIG.RPC_URL, {
+      const connection = new Connection(config.RPC_URL, {
         commitment: "confirmed",
         // Add timeout to prevent hanging requests
         httpHeaders: {

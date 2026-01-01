@@ -30,7 +30,7 @@ export function FaucetButton() {
   return (
     <button
       onClick={handleFaucet}
-      className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg font-semibold hover:from-green-500 hover:to-green-400 transition-all shadow-lg shadow-green-500/20"
+      className="px-3 py-1.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 active:bg-green-800 transition-colors text-sm"
     >
       Get Devnet SOL
     </button>

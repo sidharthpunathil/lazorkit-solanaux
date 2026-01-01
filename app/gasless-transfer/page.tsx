@@ -36,31 +36,31 @@ export default function GaslessTransferPage() {
         <Navigation />
 
         <div className="mb-8">
-          <h1 className="text-5xl font-bold mb-4 text-foreground">Gasless Transfer</h1>
-          <p className="text-muted-foreground text-lg">
+          <h1 className="text-5xl font-bold mb-4 text-gray-900">Gasless Transfer</h1>
+          <p className="text-gray-600 text-lg">
             Send SOL or USDC without holding SOL for fees. Powered by Lazorkit's
             paymaster service.
           </p>
         </div>
 
         {!isConnected ? (
-          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6">
-            <p className="text-yellow-400">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+            <p className="text-amber-700">
               Please connect your wallet first.{" "}
-              <a href="/passkey-login" className="text-yellow-300 hover:text-yellow-200 underline transition-colors">
+              <a href="/passkey-login" className="text-amber-600 hover:text-amber-800 underline transition-colors font-medium">
                 Go to Passkey Login →
               </a>
             </p>
           </div>
         ) : (
           <>
-            <div className="bg-card rounded-lg border border-border shadow-sm p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-2 text-foreground">Your Wallet</h2>
-              <p className="text-sm text-muted-foreground font-mono mb-2">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mb-6">
+              <h2 className="text-xl font-semibold mb-3 text-gray-900">Your Wallet</h2>
+              <p className="text-sm text-gray-600 font-mono mb-2">
                 {smartWalletAddress?.slice(0, 16)}...{smartWalletAddress?.slice(-8)}
               </p>
               {balance !== null && (
-                <p className="text-lg font-semibold text-foreground">{balance.toFixed(4)} SOL</p>
+                <p className="text-2xl font-bold text-gray-900">{balance.toFixed(4)} <span className="text-lg font-semibold text-gray-600">SOL</span></p>
               )}
             </div>
 

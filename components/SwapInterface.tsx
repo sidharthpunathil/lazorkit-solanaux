@@ -7,22 +7,32 @@
 
 "use client";
 
-import { useState } from "react";
-import { useTokenSwap, TOKEN_MINTS } from "@/lib/hooks/useTokenSwap";
-
-const TOKEN_OPTIONS = [
-  { value: TOKEN_MINTS.SOL, label: "SOL" },
-  { value: TOKEN_MINTS.USDC, label: "USDC" },
-  { value: TOKEN_MINTS.USDT, label: "USDT" },
-];
+import { useState, useEffect } from "react";
+import { useTokenSwap, getTokenMints } from "@/lib/hooks/useTokenSwap";
+import { useWalletStore } from "@/lib/store/walletStore";
 
 export function SwapInterface() {
+  const network = useWalletStore((state) => state.network);
+  const tokenMints = getTokenMints(network);
+  
+  const TOKEN_OPTIONS = [
+    { value: tokenMints.SOL, label: "SOL" },
+    { value: tokenMints.USDC, label: "USDC" },
+    { value: tokenMints.USDT, label: "USDT" },
+  ];
+
   const { fetchQuote, executeSwap, isFetchingQuote, isSwapping, quote } =
     useTokenSwap();
 
-  const [inputToken, setInputToken] = useState<string>(TOKEN_MINTS.SOL);
-  const [outputToken, setOutputToken] = useState<string>(TOKEN_MINTS.USDC);
+  const [inputToken, setInputToken] = useState<string>(tokenMints.SOL);
+  const [outputToken, setOutputToken] = useState<string>(tokenMints.USDC);
   const [amount, setAmount] = useState("0.1");
+
+  // Reset tokens when network changes
+  useEffect(() => {
+    setInputToken(tokenMints.SOL);
+    setOutputToken(tokenMints.USDC);
+  }, [network, tokenMints.SOL, tokenMints.USDC]);
 
   const handleGetQuote = async () => {
     if (!amount || parseFloat(amount) <= 0) {
@@ -60,19 +70,19 @@ export function SwapInterface() {
       : 0;
 
   return (
-    <div className="bg-card rounded-lg border border-border shadow-sm p-6 mb-6">
-      <h2 className="text-2xl font-semibold mb-6 text-foreground">Swap Tokens</h2>
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 mb-6">
+      <h2 className="text-2xl font-semibold mb-8 text-gray-900">Swap Tokens</h2>
 
       <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2.5">
             From
           </label>
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <select
               value={inputToken}
               onChange={(e) => setInputToken(e.target.value)}
-              className="px-4 py-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-foreground"
+              className="px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 font-medium transition-all duration-200 hover:border-gray-400"
             >
               {TOKEN_OPTIONS.map((token) => (
                 <option key={token.value} value={token.value}>
@@ -86,7 +96,7 @@ export function SwapInterface() {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.1"
-              className="flex-1 px-4 py-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-foreground placeholder:text-muted-foreground"
+              className="flex-1 px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder:text-gray-400 font-medium transition-all duration-200 hover:border-gray-400"
             />
           </div>
         </div>
@@ -97,20 +107,22 @@ export function SwapInterface() {
               setInputToken(outputToken);
               setOutputToken(inputToken);
             }}
-            className="p-2 bg-muted hover:bg-muted/80 rounded-full transition-colors text-foreground"
+            className="p-3 bg-gray-100 hover:bg-gray-200 rounded-full transition-all duration-200 text-gray-600 hover:text-gray-900"
             aria-label="Swap tokens"
           >
-            ⇅
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+            </svg>
           </button>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">To</label>
-          <div className="flex gap-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2.5">To</label>
+          <div className="flex gap-3">
             <select
               value={outputToken}
               onChange={(e) => setOutputToken(e.target.value)}
-              className="px-4 py-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-foreground"
+              className="px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 font-medium transition-all duration-200 hover:border-gray-400"
             >
               {TOKEN_OPTIONS.map((token) => (
                 <option key={token.value} value={token.value}>
@@ -118,55 +130,55 @@ export function SwapInterface() {
                 </option>
               ))}
             </select>
-            <div className="flex-1 px-4 py-2.5 bg-background border border-border rounded-lg text-foreground">
+            <div className="flex-1 px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 font-medium">
               {quote ? (
-                <span className="text-foreground">
+                <span className="text-gray-900">
                   {outputAmount.toFixed(6)} {outputTokenLabel}
                 </span>
               ) : (
-                <span className="text-muted-foreground">-</span>
+                <span className="text-gray-400">-</span>
               )}
             </div>
           </div>
         </div>
 
         {quote && (
-          <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-blue-400">Price Impact</span>
+              <span className="text-sm font-medium text-blue-700">Price Impact</span>
               <span
                 className={`text-sm font-semibold ${
                   quote.priceImpactPct > 1
-                    ? "text-red-400"
+                    ? "text-red-600"
                     : quote.priceImpactPct > 0.5
-                    ? "text-yellow-400"
-                    : "text-green-400"
+                    ? "text-amber-600"
+                    : "text-green-600"
                 }`}
               >
                 {quote.priceImpactPct.toFixed(2)}%
               </span>
             </div>
-            <p className="text-xs text-blue-400/80">
+            <p className="text-xs text-blue-600/80">
               You'll receive approximately {outputAmount.toFixed(6)} {outputTokenLabel}{" "}
               for {amount} {inputTokenLabel}
             </p>
           </div>
         )}
 
-        <div className="flex gap-4">
+        <div className="flex gap-3 pt-2">
           <button
             onClick={handleGetQuote}
             disabled={isFetchingQuote || !amount || parseFloat(amount) <= 0}
-            className="flex-1 px-6 py-3 bg-muted text-foreground rounded-lg font-semibold hover:bg-muted/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-900 rounded-lg font-medium hover:bg-gray-200 active:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isFetchingQuote ? "Fetching Quote..." : "Get Quote"}
           </button>
           <button
             onClick={handleSwap}
             disabled={isSwapping || !quote}
-            className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-lg font-semibold hover:from-purple-500 hover:to-purple-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-500/20"
+            className="flex-1 px-4 py-2.5 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 active:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {isSwapping ? "Swapping..." : "Execute Swap (Gasless)"}
+            {isSwapping ? "Swapping..." : "Execute Swap"}
           </button>
         </div>
       </div>

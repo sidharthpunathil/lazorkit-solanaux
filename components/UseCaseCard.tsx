@@ -19,9 +19,9 @@ interface UseCaseCardProps {
 }
 
 const badgeStyles = {
-  core: "bg-green-500/20 text-green-400 border-green-500/30",
-  recommended: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  advanced: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+  core: "bg-green-50 text-green-700 border-green-200",
+  recommended: "bg-blue-50 text-blue-700 border-blue-200",
+  advanced: "bg-purple-50 text-purple-700 border-purple-200",
 };
 
 export function UseCaseCard({
@@ -34,23 +34,23 @@ export function UseCaseCard({
   return (
     <Link
       href={href}
-      className="group block p-6 bg-card rounded-lg border border-border hover:border-accent/50 transition-all duration-200 hover:shadow-lg"
+      className="group block p-6 bg-white rounded-2xl border border-gray-200 hover:border-purple-300 transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/5"
     >
       <div className="flex items-start justify-between mb-4">
-        <h2 className="text-2xl font-semibold text-foreground group-hover:text-accent transition-colors">
+        <h2 className="text-xl font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
           {title}
         </h2>
         <span
-          className={`text-xs font-medium px-2.5 py-1 rounded border ${badgeStyles[badge.variant]}`}
+          className={`text-xs font-semibold px-2.5 py-1 rounded-lg border ${badgeStyles[badge.variant]}`}
         >
           {badge.label}
         </span>
       </div>
-      <p className="text-muted-foreground mb-4 leading-relaxed">{description}</p>
-      <ul className="text-sm text-muted-foreground space-y-2">
+      <p className="text-gray-600 mb-5 leading-relaxed text-sm">{description}</p>
+      <ul className="text-sm text-gray-600 space-y-2">
         {features.map((feature, index) => (
-          <li key={index} className="flex items-center gap-2">
-            <span className="text-accent">•</span>
+          <li key={index} className="flex items-center gap-2.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-500 flex-shrink-0"></span>
             <span>{feature}</span>
           </li>
         ))}

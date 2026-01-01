@@ -27,40 +27,38 @@ export function WalletStatus() {
   };
 
   return (
-    <div className="mb-8 p-5 bg-card rounded-lg border border-border shadow-sm">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <p className="text-sm text-muted-foreground mb-2">Smart Wallet Address</p>
-            <div className="flex items-center gap-2">
-              <code className="text-sm font-mono text-foreground break-all">
-                {showFullAddress ? smartWalletAddress : `${smartWalletAddress.slice(0, 8)}...${smartWalletAddress.slice(-8)}`}
-              </code>
-              <button
-                onClick={() => setShowFullAddress(!showFullAddress)}
-                className="text-xs text-accent hover:text-purple-400 transition-colors px-2 py-1 rounded"
-                title={showFullAddress ? "Show shortened" : "Show full address"}
-              >
-                {showFullAddress ? "Hide" : "Show Full"}
-              </button>
-              <button
-                onClick={copyAddress}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded"
-                title="Copy address"
-              >
-                Copy
-              </button>
-            </div>
+    <div className="mb-8 p-6 bg-white rounded-2xl border border-gray-200 shadow-sm">
+      <div className="flex items-center justify-between gap-6">
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-medium text-gray-500 mb-2.5 uppercase tracking-wide">Smart Wallet Address</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <code className="text-sm font-mono text-gray-900 break-all bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
+              {showFullAddress ? smartWalletAddress : `${smartWalletAddress.slice(0, 8)}...${smartWalletAddress.slice(-8)}`}
+            </code>
+            <button
+              onClick={() => setShowFullAddress(!showFullAddress)}
+              className="text-xs font-medium text-purple-600 hover:text-purple-700 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-purple-50"
+              title={showFullAddress ? "Show shortened" : "Show full address"}
+            >
+              {showFullAddress ? "Hide" : "Show Full"}
+            </button>
+            <button
+              onClick={copyAddress}
+              className="text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-gray-100"
+              title="Copy address"
+            >
+              Copy
+            </button>
           </div>
-          {balance !== null && (
-            <div className="text-right ml-4">
-              <p className="text-sm text-muted-foreground mb-1">Balance</p>
-              <p className="text-lg font-semibold text-foreground">
-                {balance.toFixed(4)} SOL
-              </p>
-            </div>
-          )}
         </div>
+        {balance !== null && (
+          <div className="text-right flex-shrink-0">
+            <p className="text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Balance</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {balance.toFixed(4)} <span className="text-lg font-semibold text-gray-600">SOL</span>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

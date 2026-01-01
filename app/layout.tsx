@@ -10,9 +10,11 @@
 
 "use client";
 
+import type { ReactNode } from "react";
 import { LazorkitProvider } from "@lazorkit/wallet";
 import { Toaster } from "react-hot-toast";
-import { LAZORKIT_CONFIG } from "@/lib/config/lazorkit";
+import { getLazorkitConfig } from "@/lib/config/lazorkit";
+import { useWalletStore } from "@/lib/store/walletStore";
 import "./globals.css";
 
 // Polyfill Buffer for client-side (required for Solana SDK)
@@ -37,20 +39,34 @@ if (typeof window !== "undefined") {
   };
 }
 
+// Separate component to use hooks (can't use hooks directly in layout)
+function LazorkitProviderWrapper({ children }: { children: ReactNode }) {
+  const network = useWalletStore((state) => state.network);
+  const config = getLazorkitConfig(network);
+  
+  // Type assertion needed due to React type version mismatch between project and SDK
+  return (
+    <LazorkitProvider
+      key={network} // Force remount when network changes
+      rpcUrl={config.RPC_URL}
+      portalUrl={config.PORTAL_URL}
+      paymasterConfig={config.PAYMASTER}
+    >
+      {children as any}
+    </LazorkitProvider>
+  );
+}
+
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body className="min-h-screen bg-background text-foreground antialiased">
         {/* Lazorkit Provider - Wraps entire app for wallet access */}
-        <LazorkitProvider
-          rpcUrl={LAZORKIT_CONFIG.RPC_URL}
-          portalUrl={LAZORKIT_CONFIG.PORTAL_URL}
-          paymasterConfig={LAZORKIT_CONFIG.PAYMASTER}
-        >
+        <LazorkitProviderWrapper>
           {children}
           {/* Toast notifications for user feedback */}
           <Toaster
@@ -58,27 +74,27 @@ export default function RootLayout({
             toastOptions={{
               duration: 4000,
               style: {
-                background: "#1a1a1a",
-                color: "#ededed",
-                border: "1px solid #2a2a2a",
+                background: "#ffffff",
+                color: "#1a1a1a",
+                border: "1px solid #e5e5e5",
               },
               success: {
                 duration: 3000,
                 iconTheme: {
                   primary: "#4ade80",
-                  secondary: "#1a1a1a",
+                  secondary: "#ffffff",
                 },
               },
               error: {
                 duration: 4000,
                 iconTheme: {
                   primary: "#ef4444",
-                  secondary: "#1a1a1a",
+                  secondary: "#ffffff",
                 },
               },
             }}
           />
-        </LazorkitProvider>
+        </LazorkitProviderWrapper>
       </body>
     </html>
   );

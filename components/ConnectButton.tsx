@@ -17,7 +17,7 @@ export function ConnectButton() {
     return (
       <button
         onClick={disconnect}
-        className="px-4 py-2 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 transition-colors font-medium"
+        className="px-4 py-2 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 active:bg-red-100 transition-colors font-medium text-sm"
       >
         Disconnect ({wallet.smartWallet.slice(0, 6)}...)
       </button>
@@ -28,7 +28,7 @@ export function ConnectButton() {
     <button
       onClick={connect}
       disabled={isConnecting}
-      className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-lg font-semibold hover:from-purple-500 hover:to-purple-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-purple-500/20"
+      className="px-5 py-2.5 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 active:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
     >
       {isConnecting ? "Connecting..." : "Sign In with Passkey"}
     </button>

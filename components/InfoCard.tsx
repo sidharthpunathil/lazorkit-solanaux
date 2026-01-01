@@ -12,9 +12,9 @@ interface InfoCardProps {
 }
 
 const variantStyles = {
-  blue: "bg-blue-500/10 border-blue-500/30 text-blue-400",
-  green: "bg-green-500/10 border-green-500/30 text-green-400",
-  yellow: "bg-yellow-500/10 border-yellow-500/30 text-yellow-400",
+  blue: "bg-blue-50 border-blue-200 text-blue-900",
+  green: "bg-green-50 border-green-200 text-green-900",
+  yellow: "bg-amber-50 border-amber-200 text-amber-900",
 };
 
 export function InfoCard({
@@ -23,11 +23,14 @@ export function InfoCard({
   variant = "blue",
 }: InfoCardProps) {
   return (
-    <div className={`${variantStyles[variant]} border rounded-lg p-6`}>
-      <h3 className="text-lg font-semibold mb-3">{title}</h3>
-      <ul className="text-sm space-y-2 list-disc list-inside">
+    <div className={`${variantStyles[variant]} border rounded-2xl p-6`}>
+      <h3 className="text-lg font-semibold mb-4">{title}</h3>
+      <ul className="text-sm space-y-2.5">
         {items.map((item, index) => (
-          <li key={index}>{item}</li>
+          <li key={index} className="flex items-start gap-2.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-current mt-1.5 flex-shrink-0"></span>
+            <span className="leading-relaxed">{item}</span>
+          </li>
         ))}
       </ul>
     </div>

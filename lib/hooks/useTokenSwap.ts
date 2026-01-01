@@ -17,12 +17,24 @@ import { PublicKey, TransactionInstruction } from "@solana/web3.js";
 import { LAZORKIT_CONFIG } from "@/lib/config/lazorkit";
 import toast from "react-hot-toast";
 
-// Common token mints on Devnet
+import { useWalletStore, type Network } from "@/lib/store/walletStore";
+
+// Token mints for different networks
 export const TOKEN_MINTS = {
-  SOL: "So11111111111111111111111111111111111111112", // Wrapped SOL
-  USDC: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU", // Devnet USDC
-  USDT: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", // Devnet USDT
+  devnet: {
+    SOL: "So11111111111111111111111111111111111111112", // Wrapped SOL (same on all networks)
+    USDC: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU", // Devnet USDC
+    USDT: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", // Devnet USDT
+  },
+  mainnet: {
+    SOL: "So11111111111111111111111111111111111111112", // Wrapped SOL
+    USDC: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // Mainnet USDC
+    USDT: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", // Mainnet USDT
+  },
 } as const;
+
+// Helper to get token mints for current network
+export const getTokenMints = (network: Network) => TOKEN_MINTS[network];
 
 interface SwapQuote {
   readonly inputMint: string;
@@ -36,6 +48,7 @@ interface SwapQuote {
 export function useTokenSwap() {
   const { signAndSendTransaction, smartWalletAddress, isConnected } =
     useLazorkitWallet();
+  const network = useWalletStore((state) => state.network);
   const [isFetchingQuote, setIsFetchingQuote] = useState(false);
   const [isSwapping, setIsSwapping] = useState(false);
   const [quote, setQuote] = useState<SwapQuote | null>(null);
@@ -60,15 +73,20 @@ export function useTokenSwap() {
     try {
       // Convert amount to smallest unit (for SOL: lamports, for tokens: decimals)
       const inputMintPubkey = new PublicKey(inputMint);
-      const isSOL = inputMint === TOKEN_MINTS.SOL;
+      const tokenMints = getTokenMints(network);
+      const isSOL = inputMint === tokenMints.SOL;
       const amountInSmallestUnit = isSOL
         ? amount * 1_000_000_000 // SOL has 9 decimals
         : amount * 1_000_000; // USDC/USDT have 6 decimals
 
       // Fetch quote from Jupiter API
-      // Note: Jupiter API v6 works with both mainnet and devnet
-      // However, Devnet may have limited liquidity and token support
-      const quoteUrl = new URL("https://quote-api.jup.ag/v6/quote");
+      // Jupiter API v6 automatically detects network from RPC, but we can specify it
+      // For devnet, Jupiter may have limited liquidity
+      const baseUrl = network === "mainnet" 
+        ? "https://quote-api.jup.ag/v6"
+        : "https://quote-api.jup.ag/v6"; // Same API, but devnet has limited support
+      
+      const quoteUrl = new URL(`${baseUrl}/quote`);
       quoteUrl.searchParams.set("inputMint", inputMint);
       quoteUrl.searchParams.set("outputMint", outputMint);
       quoteUrl.searchParams.set("amount", amountInSmallestUnit.toString());
@@ -104,18 +122,17 @@ export function useTokenSwap() {
         
         // Provide more helpful error messages
         if (errorMessage.includes("Failed to fetch") || errorMessage.includes("NetworkError")) {
-          const isDevnet = LAZORKIT_CONFIG.RPC_URL.includes("devnet");
-          const devnetNote = isDevnet
-            ? "\n\nNote: You're on Devnet. Jupiter API may have limited Devnet support. " +
-              "Some token pairs may not have liquidity. Try SOL ↔ USDC swaps first."
-            : "";
+          const networkNote = network === "devnet"
+            ? "\n\nNote: You're on Devnet. Jupiter API has limited Devnet support. " +
+              "Some token pairs may not have liquidity. Try switching to Mainnet or try SOL ↔ USDC swaps first."
+            : "\n\nNote: If you're experiencing issues, try switching to Devnet for testing.";
           
           throw new Error(
             "Network error: Unable to reach Jupiter API. This could be due to:\n" +
             "- Internet connection issues\n" +
             "- CORS restrictions (try a different browser)\n" +
             "- Jupiter API temporarily unavailable" +
-            devnetNote +
+            networkNote +
             "\n\nPlease check your connection and try again."
           );
         }
@@ -185,9 +202,14 @@ export function useTokenSwap() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
 
+      // Get swap transaction from Jupiter
+      const swapBaseUrl = network === "mainnet"
+        ? "https://quote-api.jup.ag/v6"
+        : "https://quote-api.jup.ag/v6";
+      
       let response: Response;
       try {
-        response = await fetch("https://quote-api.jup.ag/v6/swap", {
+        response = await fetch(`${swapBaseUrl}/swap`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

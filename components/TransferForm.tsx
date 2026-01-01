@@ -70,21 +70,23 @@ export function TransferForm({
 
   const buttonStyles =
     type === "SOL"
-      ? "bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 shadow-lg shadow-purple-500/20"
-      : "bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 shadow-lg shadow-green-500/20";
+      ? "bg-purple-600 hover:bg-purple-700 active:bg-purple-800"
+      : "bg-green-600 hover:bg-green-700 active:bg-green-800";
 
   return (
-    <div className="bg-card rounded-lg border border-border shadow-sm p-6 mb-6">
-      <h2 className="text-2xl font-semibold mb-2 text-foreground">Transfer {type}</h2>
-      <p className="text-muted-foreground mb-6">
-        {type === "SOL"
-          ? "Send SOL to any Solana address. The transaction fee will be sponsored by the paymaster (gasless!)."
-          : "Send USDC tokens. Transaction fees will be paid in USDC (no SOL needed!). This is perfect for users who only hold stablecoins."}
-      </p>
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 mb-6">
+      <div className="mb-6">
+        <h2 className="text-2xl font-semibold mb-2 text-gray-900">Transfer {type}</h2>
+        <p className="text-gray-600 text-sm leading-relaxed">
+          {type === "SOL"
+            ? "Send SOL to any Solana address. The transaction fee will be sponsored by the paymaster (gasless!)."
+            : "Send USDC tokens. Transaction fees will be paid in USDC (no SOL needed!). This is perfect for users who only hold stablecoins."}
+        </p>
+      </div>
 
       <div className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2.5">
             Recipient Address
           </label>
           <input
@@ -92,12 +94,12 @@ export function TransferForm({
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
             placeholder="Enter Solana address"
-            className="w-full px-4 py-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-foreground placeholder:text-muted-foreground"
+            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder:text-gray-400 font-mono text-sm transition-all duration-200 hover:border-gray-400"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-muted-foreground mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2.5">
             Amount ({type})
           </label>
           <input
@@ -106,16 +108,16 @@ export function TransferForm({
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder={type === "SOL" ? "0.1" : "1"}
-            className="w-full px-4 py-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-foreground placeholder:text-muted-foreground"
+            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder:text-gray-400 font-medium transition-all duration-200 hover:border-gray-400"
           />
         </div>
 
         <button
           onClick={handleTransfer}
           disabled={isTransferring || !recipient || !amount}
-          className={`w-full px-6 py-3 ${buttonStyles} text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
+          className={`w-full px-4 py-2.5 ${buttonStyles} text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
         >
-          {isTransferring ? "Sending..." : `Send ${type} (Gasless)`}
+          {isTransferring ? "Sending..." : `Send ${type}`}
         </button>
       </div>
     </div>

@@ -36,23 +36,23 @@ export function WalletInfo() {
   };
 
   return (
-    <div className="bg-card rounded-lg border border-border shadow-sm p-6 mb-6">
-      <h2 className="text-2xl font-semibold mb-6 text-foreground">Wallet Information</h2>
+    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 mb-6">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-900">Wallet Information</h2>
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         <div>
-          <label className="text-sm font-medium text-muted-foreground mb-2 block">
-            Smart Wallet Address (Full)
+          <label className="text-xs font-medium text-gray-500 mb-2.5 block uppercase tracking-wide">
+            Smart Wallet Address
           </label>
-          <div className="p-3 bg-background rounded-lg border border-border">
+          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
             <div className="flex items-center justify-between gap-4">
-              <code className="text-sm font-mono break-all text-foreground">
+              <code className="text-sm font-mono break-all text-gray-900">
                 {wallet.smartWallet}
               </code>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   onClick={copyAddress}
-                  className="text-accent hover:text-purple-400 text-sm font-medium transition-colors px-2 py-1 rounded"
+                  className="text-xs font-medium text-purple-600 hover:text-purple-700 transition-colors px-3 py-1.5 rounded-lg hover:bg-purple-50"
                   title="Copy address"
                 >
                   {addressCopied ? "Copied" : "Copy"}
@@ -62,7 +62,7 @@ export function WalletInfo() {
                     href={explorerUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-accent hover:text-purple-400 text-sm font-medium transition-colors"
+                    className="text-xs font-medium text-purple-600 hover:text-purple-700 transition-colors px-3 py-1.5 rounded-lg hover:bg-purple-50"
                   >
                     Explorer →
                   </a>
@@ -70,43 +70,43 @@ export function WalletInfo() {
               </div>
             </div>
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">
+          <p className="mt-2.5 text-xs text-gray-500">
             This is your Solana wallet address on Devnet. Use this to receive test funds.
           </p>
         </div>
 
         <div>
-          <label className="text-sm font-medium text-muted-foreground mb-2 block">
+          <label className="text-xs font-medium text-gray-500 mb-2.5 block uppercase tracking-wide">
             Balance
           </label>
-          <div className="p-3 bg-background rounded-lg border border-border flex items-center justify-between">
-            <p className="text-2xl font-semibold text-foreground">
-              {balance !== null ? `${balance.toFixed(4)} SOL` : "Loading..."}
+          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-between">
+            <p className="text-2xl font-bold text-gray-900">
+              {balance !== null ? `${balance.toFixed(4)} ` : "Loading..."}
+              {balance !== null && <span className="text-lg font-semibold text-gray-600">SOL</span>}
             </p>
             <FaucetButton />
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">
+          <p className="mt-2.5 text-xs text-gray-500">
             Need test SOL? Click the button above to get free Devnet SOL from the faucet.
           </p>
         </div>
 
-
         <div>
-          <label className="text-sm font-medium text-muted-foreground mb-2 block">
+          <label className="text-xs font-medium text-gray-500 mb-2.5 block uppercase tracking-wide">
             Platform
           </label>
-          <div className="p-3 bg-background rounded-lg border border-border">
-            <p className="text-sm text-foreground">{wallet.platform}</p>
+          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <p className="text-sm font-medium text-gray-900">{wallet.platform}</p>
           </div>
         </div>
 
         {wallet.accountName && (
           <div>
-            <label className="text-sm font-medium text-muted-foreground mb-2 block">
+            <label className="text-xs font-medium text-gray-500 mb-2.5 block uppercase tracking-wide">
               Account Name
             </label>
-            <div className="p-3 bg-background rounded-lg border border-border">
-              <p className="text-sm text-foreground">{wallet.accountName}</p>
+            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+              <p className="text-sm font-medium text-gray-900">{wallet.accountName}</p>
             </div>
           </div>
         )}

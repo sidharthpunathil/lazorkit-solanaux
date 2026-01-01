@@ -9,6 +9,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { NetworkSwitcher } from "./NetworkSwitcher";
 
 export function Header() {
   const [copied, setCopied] = useState(false);
@@ -24,15 +25,15 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
       <div className="container mx-auto px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded bg-gradient-to-br from-purple-500 to-purple-600">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-600">
               <span className="text-white font-bold text-lg">L</span>
             </div>
-            <span className="text-xl font-bold text-foreground">Lazorkit</span>
+            <span className="text-xl font-bold text-gray-900">Lazorkit</span>
           </Link>
 
           {/* Navigation Links */}
@@ -41,7 +42,7 @@ export function Header() {
               href="https://docs.lazorkit.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium"
             >
               Documentation
             </a>
@@ -49,13 +50,13 @@ export function Header() {
               href="https://github.com/lazor-kit/lazor-kit"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium"
             >
               GitHub
             </a>
             <Link
               href="/passkey-login"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium"
             >
               Example dApp
             </Link>
@@ -63,7 +64,7 @@ export function Header() {
               href="https://x.com/lazorkit"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium"
             >
               X
             </a>
@@ -71,19 +72,22 @@ export function Header() {
               href="https://t.me/lazorkit"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium"
             >
               Telegram
             </a>
           </nav>
 
-          {/* Get Started Button */}
-          <Link
-            href="/passkey-login"
-            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-lg font-medium hover:from-purple-500 hover:to-purple-400 transition-all shadow-lg shadow-purple-500/20"
-          >
-            Get Started
-          </Link>
+          {/* Right side: Network Switcher and Get Started Button */}
+          <div className="flex items-center gap-4">
+            <NetworkSwitcher />
+            <Link
+              href="/passkey-login"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 active:bg-purple-800 transition-colors"
+            >
+              Get Started
+            </Link>
+          </div>
         </div>
       </div>
     </header>

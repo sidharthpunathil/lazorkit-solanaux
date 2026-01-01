@@ -29,9 +29,9 @@ export function Hero() {
         {/* Left Section - Text Content */}
         <div className="space-y-8">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20">
-            <span className="text-xs font-semibold text-purple-400">New</span>
-            <span className="text-xs text-muted-foreground">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-50 border border-purple-200">
+            <span className="text-xs font-semibold text-purple-700">New</span>
+            <span className="text-xs text-gray-600">
               Passkey smart-wallet SDK for Solana
             </span>
           </div>
@@ -39,16 +39,16 @@ export function Hero() {
           {/* Headline */}
           <div className="space-y-2">
             <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
-              <span className="text-purple-500">Smart Wallets.</span>
+              <span className="text-purple-600">Smart Wallets.</span>
               <br />
-              <span className="text-foreground">Powered by</span>
+              <span className="text-gray-900">Powered by</span>
               <br />
-              <span className="text-foreground">Passkeys.</span>
+              <span className="text-gray-900">Passkeys.</span>
             </h1>
           </div>
 
           {/* Description */}
-          <p className="text-lg text-muted-foreground leading-relaxed max-w-xl">
+          <p className="text-lg text-gray-600 leading-relaxed max-w-xl">
             Passwordless, phishing-resistant auth for Solana. Users sign in with
             Face ID/Touch ID—no seed phrases, no extensions. Fast, secure, and
             ready to ship.
@@ -60,16 +60,18 @@ export function Hero() {
               href="https://docs.lazorkit.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-lg font-semibold hover:from-purple-500 hover:to-purple-400 transition-all shadow-lg shadow-purple-500/20"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 active:bg-purple-800 transition-colors"
             >
               Explore Docs
-              <span className="text-lg">→</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </Link>
             <a
               href="https://github.com/lazor-kit/lazor-kit"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-card border border-border text-foreground rounded-lg font-semibold hover:bg-muted transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white border border-gray-300 text-gray-900 rounded-xl font-semibold hover:bg-gray-50 transition-all duration-200 shadow-sm"
             >
               <svg
                 className="w-5 h-5"
@@ -88,13 +90,13 @@ export function Hero() {
           </div>
 
           {/* Install Command */}
-          <div className="flex items-center gap-3 p-4 bg-card border border-border rounded-lg">
-            <code className="flex-1 text-sm text-foreground font-mono">
+          <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl">
+            <code className="flex-1 text-sm text-gray-900 font-mono">
               npm i @lazorkit/wallet
             </code>
             <button
               onClick={copyInstallCommand}
-              className="px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground bg-muted hover:bg-border rounded transition-colors"
+              className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 bg-white hover:bg-gray-100 border border-gray-300 rounded-lg transition-all duration-200"
             >
               {copied ? "Copied!" : "Copy"}
             </button>
@@ -103,14 +105,14 @@ export function Hero() {
 
         {/* Right Section - Visual Card */}
         <div className="relative">
-          <div className="relative p-8 bg-card border border-border rounded-2xl shadow-xl">
+          <div className="relative p-8 bg-white border border-gray-200 rounded-2xl shadow-lg">
             {/* Security Icons */}
             <div className="space-y-6">
               {/* Shield Icon */}
               <div className="flex items-center justify-end">
-                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-green-500/20 border border-green-500/30">
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-green-50 border border-green-200">
                   <svg
-                    className="w-6 h-6 text-green-400"
+                    className="w-6 h-6 text-green-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -127,9 +129,9 @@ export function Hero() {
 
               {/* Key Icon */}
               <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-16 h-16 rounded-xl bg-purple-500/20 border border-purple-500/30">
+                <div className="flex items-center justify-center w-16 h-16 rounded-xl bg-purple-50 border border-purple-200">
                   <svg
-                    className="w-8 h-8 text-purple-400"
+                    className="w-8 h-8 text-purple-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -142,9 +144,9 @@ export function Hero() {
                     />
                   </svg>
                 </div>
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-500/20 border border-purple-500/30">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-50 border border-purple-200">
                   <svg
-                    className="w-5 h-5 text-purple-400"
+                    className="w-5 h-5 text-purple-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -161,9 +163,9 @@ export function Hero() {
 
               {/* Signal/WiFi Icon */}
               <div className="flex items-center justify-end">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-500/20 border border-blue-500/30">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-50 border border-blue-200">
                   <svg
-                    className="w-5 h-5 text-blue-400"
+                    className="w-5 h-5 text-blue-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -179,11 +181,11 @@ export function Hero() {
               </div>
 
               {/* Text Labels */}
-              <div className="space-y-3 pt-4 border-t border-border">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-green-500/20 border border-green-500/30">
+              <div className="space-y-3 pt-4 border-t border-gray-200">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex items-center justify-center w-5 h-5 rounded-full bg-green-100 border border-green-200">
                     <svg
-                      className="w-4 h-4 text-green-400"
+                      className="w-3 h-3 text-green-600"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -194,14 +196,14 @@ export function Hero() {
                       />
                     </svg>
                   </div>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm font-medium text-gray-700">
                     webAuthn verified
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center w-6 h-6 rounded-full bg-purple-500/20 border border-purple-500/30">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex items-center justify-center w-5 h-5 rounded-full bg-purple-100 border border-purple-200">
                     <svg
-                      className="w-4 h-4 text-purple-400"
+                      className="w-3 h-3 text-purple-600"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -212,7 +214,7 @@ export function Hero() {
                       />
                     </svg>
                   </div>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm font-medium text-gray-700">
                     Passkey bound smart wallet
                   </span>
                 </div>

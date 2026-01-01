@@ -141,34 +141,34 @@ export default function SubscriptionPage() {
         <Navigation />
 
         <div className="mb-8">
-          <h1 className="text-5xl font-bold mb-4 text-foreground">Subscription Service</h1>
-          <p className="text-muted-foreground text-lg">
+          <h1 className="text-5xl font-bold mb-4 text-gray-900">Subscription Service</h1>
+          <p className="text-gray-600 text-lg">
             Set up recurring USDC payments with smart wallet delegation. One-time approval,
             automated billing.
           </p>
         </div>
 
         {!isConnected ? (
-          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6">
-            <p className="text-yellow-400">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+            <p className="text-amber-700">
               Please connect your wallet first.{" "}
-              <a href="/passkey-login" className="text-yellow-300 hover:text-yellow-200 underline transition-colors">
+              <a href="/passkey-login" className="text-amber-600 hover:text-amber-800 underline transition-colors font-medium">
                 Go to Passkey Login →
               </a>
             </p>
           </div>
         ) : (
           <>
-            <div className="bg-card rounded-lg border border-border shadow-sm p-6 mb-6">
-              <h2 className="text-2xl font-semibold mb-4 text-foreground">Create Subscription</h2>
-              <p className="text-muted-foreground mb-6 text-sm">
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 mb-6">
+              <h2 className="text-2xl font-semibold mb-4 text-gray-900">Create Subscription</h2>
+              <p className="text-gray-600 mb-6 text-sm leading-relaxed">
                 Set up a recurring payment. After approval, charges will happen
                 automatically without requiring your signature each time.
               </p>
 
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2.5">
                     Service Name
                   </label>
                   <input
@@ -178,13 +178,13 @@ export default function SubscriptionPage() {
                       setNewSubscription({ ...newSubscription, name: e.target.value })
                     }
                     placeholder="e.g., Premium Plan"
-                    className="w-full px-4 py-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-foreground placeholder:text-muted-foreground"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder:text-gray-400 font-medium transition-all duration-200 hover:border-gray-400"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2.5">
                       Amount (USDC)
                     </label>
                     <input
@@ -198,12 +198,12 @@ export default function SubscriptionPage() {
                         })
                       }
                       placeholder="5"
-                      className="w-full px-4 py-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-foreground placeholder:text-muted-foreground"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder:text-gray-400 font-medium transition-all duration-200 hover:border-gray-400"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2.5">
                       Interval
                     </label>
                     <select
@@ -214,7 +214,7 @@ export default function SubscriptionPage() {
                           interval: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-foreground"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 font-medium transition-all duration-200 hover:border-gray-400"
                     >
                       <option value="weekly">Weekly</option>
                       <option value="monthly">Monthly</option>
@@ -223,7 +223,7 @@ export default function SubscriptionPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2.5">
                     Recipient Address
                   </label>
                   <input
@@ -236,24 +236,24 @@ export default function SubscriptionPage() {
                       })
                     }
                     placeholder="Enter recipient Solana address"
-                    className="w-full px-4 py-2.5 bg-background border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent text-foreground placeholder:text-muted-foreground"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder:text-gray-400 font-mono text-sm transition-all duration-200 hover:border-gray-400"
                   />
                 </div>
 
                 <button
                   onClick={handleCreateSubscription}
-                  className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-500 text-white rounded-lg font-semibold hover:from-purple-500 hover:to-purple-400 transition-all shadow-lg shadow-purple-500/20"
+                  className="w-full px-4 py-2.5 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 active:bg-purple-800 transition-colors"
                 >
                   Create Subscription
                 </button>
               </div>
             </div>
 
-            <div className="bg-card rounded-lg border border-border shadow-sm p-6 mb-6">
-              <h2 className="text-2xl font-semibold mb-4 text-foreground">Your Subscriptions</h2>
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 mb-6">
+              <h2 className="text-2xl font-semibold mb-6 text-gray-900">Your Subscriptions</h2>
 
               {subscriptions.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
+                <p className="text-gray-500 text-center py-12">
                   No active subscriptions. Create one above to get started.
                 </p>
               ) : (
@@ -261,24 +261,24 @@ export default function SubscriptionPage() {
                   {subscriptions.map((subscription) => (
                     <div
                       key={subscription.id}
-                      className={`p-4 border rounded-lg ${
+                      className={`p-5 border rounded-xl transition-all duration-200 ${
                         subscription.status === "active"
-                          ? "border-green-500/30 bg-green-500/10"
-                          : "border-border bg-background"
+                          ? "border-green-200 bg-green-50"
+                          : "border-gray-200 bg-gray-50"
                       }`}
                     >
-                      <div className="flex justify-between items-start mb-2">
+                      <div className="flex justify-between items-start mb-3">
                         <div>
-                          <h3 className="font-semibold text-lg text-foreground">{subscription.name}</h3>
-                          <p className="text-sm text-muted-foreground">
+                          <h3 className="font-semibold text-lg text-gray-900 mb-1">{subscription.name}</h3>
+                          <p className="text-sm text-gray-600">
                             {subscription.amount} USDC per {subscription.interval}
                           </p>
                         </div>
                         <span
-                          className={`px-2.5 py-1 rounded text-xs font-semibold ${
+                          className={`px-3 py-1 rounded-lg text-xs font-semibold ${
                             subscription.status === "active"
-                              ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                              : "bg-muted text-muted-foreground border border-border"
+                              ? "bg-green-100 text-green-700 border border-green-200"
+                              : "bg-gray-200 text-gray-600 border border-gray-300"
                           }`}
                         >
                           {subscription.status}
@@ -286,16 +286,16 @@ export default function SubscriptionPage() {
                       </div>
 
                       {subscription.nextCharge && (
-                        <p className="text-sm text-muted-foreground mb-2">
+                        <p className="text-sm text-gray-600 mb-1.5">
                           Next charge:{" "}
-                          {new Date(subscription.nextCharge).toLocaleDateString()}
+                          <span className="font-medium">{new Date(subscription.nextCharge).toLocaleDateString()}</span>
                         </p>
                       )}
 
                       {subscription.lastCharge && (
-                        <p className="text-sm text-muted-foreground mb-2">
+                        <p className="text-sm text-gray-600 mb-1.5">
                           Last charged:{" "}
-                          {new Date(subscription.lastCharge).toLocaleDateString()}
+                          <span className="font-medium">{new Date(subscription.lastCharge).toLocaleDateString()}</span>
                         </p>
                       )}
 
@@ -305,13 +305,13 @@ export default function SubscriptionPage() {
                             <button
                               onClick={() => handleCharge(subscription)}
                               disabled={isTransferring}
-                              className="px-4 py-2 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg hover:bg-blue-500/30 disabled:opacity-50 text-sm font-medium transition-colors"
+                              className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 text-sm font-medium transition-colors"
                             >
                               {isTransferring ? "Processing..." : "Charge Now (Demo)"}
                             </button>
                             <button
                               onClick={() => handleCancel(subscription.id)}
-                              className="px-4 py-2 bg-red-500/20 text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/30 text-sm font-medium transition-colors"
+                              className="px-3 py-1.5 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 active:bg-red-100 text-sm font-medium transition-colors"
                             >
                               Cancel
                             </button>

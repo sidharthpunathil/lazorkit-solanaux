@@ -15,11 +15,14 @@
 import { create } from "zustand";
 import { WalletInfo } from "@lazorkit/wallet";
 
+export type Network = "devnet" | "mainnet";
+
 interface WalletState {
   // Data
   wallet: WalletInfo | null;
   smartWalletAddress: string | null;
   balance: number | null;
+  network: Network;
 
   // Status
   isConnected: boolean;
@@ -31,16 +34,19 @@ interface WalletState {
   setWallet: (wallet: WalletInfo | null) => void;
   setSmartWalletAddress: (address: string | null) => void;
   setBalance: (balance: number | null) => void;
+  setNetwork: (network: Network) => void;
   reset: () => void;
 }
 
 export const useWalletStore = create<WalletState>((set) => ({
-  // Initial state
+  // Initial state - always start with devnet to avoid hydration mismatch
+  // Will sync with localStorage after mount on client side
   isConnected: false,
   isConnecting: false,
   wallet: null,
   smartWalletAddress: null,
   balance: null,
+  network: "devnet",
   
   // Actions
   setConnecting: (isConnecting) => set({ isConnecting }),
@@ -51,6 +57,12 @@ export const useWalletStore = create<WalletState>((set) => ({
   }),
   setSmartWalletAddress: (address) => set({ smartWalletAddress: address }),
   setBalance: (balance) => set({ balance }),
+  setNetwork: (network) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("solana-network", network);
+    }
+    set({ network });
+  },
   
   // Reset all state (useful for disconnect)
   reset: () => set({
@@ -59,6 +71,7 @@ export const useWalletStore = create<WalletState>((set) => ({
     wallet: null,
     smartWalletAddress: null,
     balance: null,
+    // Keep network setting on reset
   }),
 }));
 

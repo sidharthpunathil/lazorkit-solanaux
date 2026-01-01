@@ -32,18 +32,18 @@ export default function TokenSwapPage() {
         <Navigation />
 
         <div className="mb-8">
-          <h1 className="text-5xl font-bold mb-4 text-foreground">Token Swap</h1>
-          <p className="text-muted-foreground text-lg">
+          <h1 className="text-5xl font-bold mb-4 text-gray-900">Token Swap</h1>
+          <p className="text-gray-600 text-lg">
             Swap tokens on Solana using Jupiter aggregator. Get the best prices across
             all DEXs, executed gaslessly.
           </p>
         </div>
 
         {!isConnected ? (
-          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6">
-            <p className="text-yellow-400">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+            <p className="text-amber-700">
               Please connect your wallet first.{" "}
-              <a href="/passkey-login" className="text-yellow-300 hover:text-yellow-200 underline transition-colors">
+              <a href="/passkey-login" className="text-amber-600 hover:text-amber-800 underline transition-colors font-medium">
                 Go to Passkey Login →
               </a>
             </p>

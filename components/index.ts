@@ -14,6 +14,7 @@ export { TransactionStatus } from "./TransactionStatus";
 export { SwapInterface } from "./SwapInterface";
 export { InfoCard } from "./InfoCard";
 export { Navigation } from "./Navigation";
+export { NetworkSwitcher } from "./NetworkSwitcher";
 export { FaucetButton } from "./FaucetButton";
 export { Header } from "./Header";
 export { Hero } from "./Hero";
