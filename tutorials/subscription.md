@@ -480,6 +480,115 @@ const cancelSubscription = async (subscriptionId: string) => {
 
 **Solution:** Always set `validUntil` timestamps.
 
+## How it's integrated in this project
+
+This project includes a subscription service demo. Here's where to find the code:
+
+### Implementation Files
+
+1. **Main Page Component**: [`app/subscription/page.tsx`](../../app/subscription/page.tsx)
+   - Complete subscription management interface
+   - Create subscription form
+   - List active subscriptions
+   - Charge and cancel functionality
+   - Demo implementation (frontend-only)
+
+2. **Transfer Hook Integration**: Uses [`lib/hooks/useGaslessTransfer.ts`](../../lib/hooks/useGaslessTransfer.ts)
+   - Uses `transferToken()` for subscription charges
+   - Gasless execution via Lazorkit paymaster
+   - Network-aware token mints
+
+3. **Wallet Hook**: Uses [`lib/hooks/useLazorkitWallet.ts`](../../lib/hooks/useLazorkitWallet.ts)
+   - Wallet connection state
+   - Smart wallet address
+   - Balance fetching
+
+### Try it out
+
+1. **Run the app**: `npm run dev`
+2. **Navigate to**: `http://localhost:3000/subscription`
+3. **Connect your wallet** (if not already connected)
+4. **Create a subscription**:
+   - Enter service name (e.g., "Premium Plan")
+   - Set amount in USDC (e.g., 5)
+   - Choose interval (weekly/monthly)
+   - Enter recipient address
+   - Click "Create Subscription"
+5. **Charge a subscription**: Click "Charge Now (Demo)" to simulate a charge
+6. **Cancel subscription**: Click "Cancel" to cancel a subscription
+
+### Key Features in the Implementation
+
+- **Frontend Demo**: This is a simplified frontend-only demo
+- **Subscription Management**: Create, list, charge, and cancel subscriptions
+- **Gasless Charges**: Subscription charges execute gaslessly
+- **State Management**: Local state management for subscriptions
+- **UI/UX**: Clean interface with status indicators
+
+### Production Implementation Requirements
+
+For a production subscription service, you would need:
+
+1. **Backend Service**:
+   - Cron job to trigger recurring charges
+   - API endpoints for subscription management
+   - Database to store subscription data
+   - Webhook handlers for payment events
+
+2. **On-Chain Delegation**:
+   - Create delegation policies on-chain
+   - Set spending limits and time windows
+   - Revoke policies on cancellation
+
+3. **Smart Contract** (Optional):
+   - Subscription management program
+   - Automated billing logic
+   - Payment escrow
+
+4. **Security**:
+   - Validate delegation policies
+   - Check spending limits
+   - Verify recipient addresses
+   - Handle failed payments
+
+### Code Example: Subscription Charge
+
+```typescript
+import { useGaslessTransfer } from "@/lib/hooks/useGaslessTransfer";
+
+function SubscriptionService() {
+  const { transferToken, isTransferring } = useGaslessTransfer();
+
+  const chargeSubscription = async (subscription: Subscription) => {
+    try {
+      // Charge the subscription gaslessly
+      const signature = await transferToken({
+        recipient: subscription.recipient,
+        amount: subscription.amount,
+        feeToken: "USDC", // Pay fees in USDC
+      });
+      
+      console.log("Subscription charged:", signature);
+      // Update subscription lastCharge and nextCharge dates
+    } catch (error) {
+      console.error("Charge failed:", error);
+    }
+  };
+}
+```
+
+### Current Limitations
+
+This demo implementation:
+- ✅ Shows the UI/UX for subscriptions
+- ✅ Demonstrates gasless charges
+- ✅ Manages subscription state locally
+- ❌ Does not set up on-chain delegation
+- ❌ Does not have automated billing (requires backend)
+- ❌ Does not persist subscriptions (uses local state)
+
+For production, you would need to implement the backend and on-chain delegation as described above.
+
 ## Recap
 
 You've learned how to:

@@ -522,6 +522,114 @@ transactionOptions: {
 }
 ```
 
+## How it's integrated in this project
+
+This project includes a complete Jupiter token swap implementation. Here's where to find the code:
+
+### Implementation Files
+
+1. **Main Page Component**: [`app/token-swap/page.tsx`](../../app/token-swap/page.tsx)
+   - Complete swap interface page
+   - Network-aware (devnet/mainnet)
+   - Transaction status display
+   - Info cards explaining Jupiter
+
+2. **Swap Hook**: [`lib/hooks/useTokenSwap.ts`](../../lib/hooks/useTokenSwap.ts)
+   - `fetchQuote()` - Get swap quotes from Jupiter API
+   - `executeSwap()` - Execute swaps gaslessly
+   - Network-aware token mints
+   - Jupiter API v6 integration with API key
+   - Error handling for devnet (Jupiter only works on mainnet)
+   - Timeout handling and retry logic
+
+3. **Swap Interface Component**: [`components/SwapInterface.tsx`](../../components/SwapInterface.tsx)
+   - Token selection (SOL, USDC, USDT)
+   - Amount input
+   - Quote display with price impact
+   - Swap execution button
+   - Network-aware warnings (devnet not supported)
+   - Real-time quote fetching
+
+4. **Configuration**: [`lib/config/lazorkit.ts`](../../lib/config/lazorkit.ts)
+   - Jupiter API base URL: `https://api.jup.ag/v6`
+   - Jupiter API key from environment variables
+   - Network-specific token mints
+
+5. **Environment Variables**: [`.env.example`](../../.env.example)
+   - `NEXT_PUBLIC_JUPITER_API_KEY` - Required for Jupiter API v6
+   - Get free API key from [portal.jup.ag](https://portal.jup.ag)
+
+### Try it out
+
+1. **Get Jupiter API Key**: 
+   - Visit [portal.jup.ag](https://portal.jup.ag)
+   - Sign up and get your free API key (60 requests/minute)
+   - Add to `.env.local`: `NEXT_PUBLIC_JUPITER_API_KEY=your-key-here`
+
+2. **Run the app**: `npm run dev`
+
+3. **Switch to Mainnet**: 
+   - Jupiter API only works on mainnet
+   - Use the network switcher in the top-right corner
+   - Switch from Devnet to Mainnet
+
+4. **Navigate to**: `http://localhost:3000/token-swap`
+
+5. **Try a swap**:
+   - Select input token (e.g., SOL)
+   - Select output token (e.g., USDC)
+   - Enter amount
+   - Click "Get Quote" to see the best price
+   - Click "Execute Swap" to complete the swap
+
+### Key Features in the Implementation
+
+- **Jupiter API v6**: Uses the latest Jupiter API with API key authentication
+- **Network Awareness**: Automatically detects devnet and shows warning
+- **Gasless Execution**: Swaps execute gaslessly via Lazorkit paymaster
+- **Best Route Finding**: Jupiter automatically finds optimal routes across all DEXs
+- **Price Impact Display**: Shows price impact percentage
+- **Error Handling**: Comprehensive error messages for network issues, API failures, etc.
+- **Timeout Protection**: 10-second timeout for quote requests, 15-second for swap requests
+
+### Code Example: Using the Hook
+
+```typescript
+import { useTokenSwap, getTokenMints } from "@/lib/hooks/useTokenSwap";
+import { useWalletStore } from "@/lib/store/walletStore";
+
+function MySwapComponent() {
+  const network = useWalletStore((state) => state.network);
+  const tokenMints = getTokenMints(network);
+  const { fetchQuote, executeSwap, quote, isFetchingQuote, isSwapping } = useTokenSwap();
+
+  const handleSwap = async () => {
+    // Get quote first
+    await fetchQuote(
+      tokenMints.SOL,    // Input: SOL
+      tokenMints.USDC,   // Output: USDC
+      0.1,               // Amount: 0.1 SOL
+      50                 // Slippage: 0.5% (50 bps)
+    );
+
+    // Execute swap
+    const signature = await executeSwap(
+      tokenMints.SOL,
+      tokenMints.USDC,
+      0.1
+    );
+    console.log("Swap complete:", signature);
+  };
+}
+```
+
+### Important Notes
+
+- **Mainnet Only**: Jupiter API only works on Solana Mainnet, not Devnet
+- **API Key Required**: You must provide a Jupiter API key in environment variables
+- **Rate Limits**: Free tier provides 60 requests per minute
+- **Network Switching**: The implementation automatically handles network switching
+
 ## Recap
 
 You've learned how to:
@@ -535,6 +643,7 @@ You've learned how to:
 - Quotes expire quickly, so refresh them
 - Always show price impact to users
 - Set appropriate compute unit limits for complex swaps
+- Jupiter API only works on mainnet
 
 ## Next steps
 
@@ -544,6 +653,7 @@ Now that you can swap tokens, try:
 
 ## Resources
 
-- [Jupiter API Documentation](https://docs.jup.ag)
+- [Jupiter API Documentation](https://dev.jup.ag/docs/apis/swap-api)
+- [Jupiter API Portal](https://portal.jup.ag) - Get your free API key
 - [Jupiter Aggregator](https://jup.ag)
 - [Lazorkit Documentation](https://docs.lazorkit.com)

@@ -398,6 +398,60 @@ try {
 }
 ```
 
+## How it's integrated in this project
+
+This project includes a complete passkey authentication implementation. Here's where to find the code:
+
+### Implementation Files
+
+1. **Main Page Component**: [`app/passkey-login/page.tsx`](../../app/passkey-login/page.tsx)
+   - Complete page implementation with connect button
+   - Message signing functionality
+   - Wallet information display
+   - Session persistence demonstration
+
+2. **Custom Hook**: [`lib/hooks/useLazorkitWallet.ts`](../../lib/hooks/useLazorkitWallet.ts)
+   - Wraps Lazorkit's `useWallet` hook
+   - Adds balance fetching
+   - Handles network switching (devnet/mainnet)
+   - Integrates with Zustand store for global state
+
+3. **Configuration**: [`lib/config/lazorkit.ts`](../../lib/config/lazorkit.ts)
+   - Network-aware configuration (devnet/mainnet)
+   - RPC, portal, and paymaster URLs
+   - Token mint addresses
+
+4. **Components**:
+   - [`components/ConnectButton.tsx`](../../components/ConnectButton.tsx) - Reusable connect/disconnect button
+   - [`components/WalletInfo.tsx`](../../components/WalletInfo.tsx) - Wallet address and balance display
+   - [`components/WalletStatus.tsx`](../../components/WalletStatus.tsx) - Enhanced wallet status with faucet button
+
+5. **State Management**: [`lib/store/walletStore.ts`](../../lib/store/walletStore.ts)
+   - Zustand store for wallet state
+   - Network switching support
+   - LocalStorage persistence
+
+6. **Layout**: [`app/layout.tsx`](../../app/layout.tsx)
+   - LazorkitProvider setup
+   - Buffer polyfill
+   - Network-aware provider configuration
+
+### Try it out
+
+1. **Run the app**: `npm run dev`
+2. **Navigate to**: `http://localhost:3000/passkey-login`
+3. **Click "Connect Wallet"** and authenticate with your passkey
+4. **Try signing a message** to test the `signMessage` functionality
+
+### Key Differences from Tutorial
+
+The actual implementation includes:
+- **Network switching**: Support for both devnet and mainnet
+- **Message signing**: Full `signMessage` and `verifyMessage` implementation
+- **Enhanced error handling**: Better error messages and rate limit handling
+- **Balance auto-refresh**: Automatic balance updates every 30 seconds
+- **Network-aware config**: Different RPC endpoints based on selected network
+
 ## Recap
 
 You've learned how to:

@@ -12,10 +12,11 @@ import { join } from 'path';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { path?: string[] } }
+  { params }: { params: Promise<{ path?: string[] }> }
 ) {
   try {
-    const pathSegments = params.path || [];
+    const { path } = await params;
+    const pathSegments = path || [];
     let filePath = pathSegments.join('/');
     
     // Default to index.html if no path

@@ -452,6 +452,81 @@ try {
 </button>
 ```
 
+## How it's integrated in this project
+
+This project includes a complete gasless transfer implementation. Here's where to find the code:
+
+### Implementation Files
+
+1. **Main Page Component**: [`app/gasless-transfer/page.tsx`](../../app/gasless-transfer/page.tsx)
+   - Complete page with SOL and USDC transfer forms
+   - Wallet balance display
+   - Transaction status tracking
+   - Network-aware implementation (devnet/mainnet)
+
+2. **Transfer Hook**: [`lib/hooks/useGaslessTransfer.ts`](../../lib/hooks/useGaslessTransfer.ts)
+   - `transferSOL()` - Gasless SOL transfers
+   - `transferToken()` - Gasless SPL token transfers (USDC, USDT, etc.)
+   - Network-aware token mints
+   - Automatic token account creation
+   - Error handling and toast notifications
+
+3. **Transfer Form Component**: [`components/TransferForm.tsx`](../../components/TransferForm.tsx)
+   - Reusable form for both SOL and token transfers
+   - Input validation
+   - Loading states
+   - Success/error feedback
+
+4. **Transaction Status Component**: [`components/TransactionStatus.tsx`](../../components/TransactionStatus.tsx)
+   - Displays transaction signature
+   - Links to Solana Explorer
+   - Success messaging
+
+5. **Configuration**: [`lib/config/lazorkit.ts`](../../lib/config/lazorkit.ts)
+   - Network-specific USDC mint addresses
+   - Devnet: `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`
+   - Mainnet: `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`
+
+### Try it out
+
+1. **Run the app**: `npm run dev`
+2. **Navigate to**: `http://localhost:3000/gasless-transfer`
+3. **Connect your wallet** (if not already connected)
+4. **Try sending SOL** - Enter a recipient address and amount
+5. **Try sending USDC** - The form will handle token account creation automatically
+
+### Key Features in the Implementation
+
+- **Network Switching**: Automatically uses correct token mints for devnet/mainnet
+- **Token Account Creation**: Automatically creates associated token accounts if needed
+- **Fee Token Selection**: Can pay fees in SOL or USDC
+- **Real-time Balance**: Shows current wallet balance
+- **Transaction Tracking**: Displays transaction signatures with explorer links
+- **Error Handling**: Comprehensive error messages and validation
+
+### Code Example: Using the Hook
+
+```typescript
+import { useGaslessTransfer } from "@/lib/hooks/useGaslessTransfer";
+
+function MyComponent() {
+  const { transferSOL, transferToken, isTransferring } = useGaslessTransfer();
+
+  const handleSendSOL = async () => {
+    try {
+      const signature = await transferSOL({
+        recipient: "RecipientAddress...",
+        amount: 0.1,
+        feeToken: "USDC", // Pay fees in USDC
+      });
+      console.log("Transaction:", signature);
+    } catch (error) {
+      console.error("Transfer failed:", error);
+    }
+  };
+}
+```
+
 ## Recap
 
 You've learned how to:
