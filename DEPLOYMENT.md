@@ -247,7 +247,7 @@ If you encounter issues:
 
 ---
 
-**Your app is now live!** 🎉
+**Your app is now live!**
 
 Share your deployment URL in your bounty submission to demonstrate the working example.
 

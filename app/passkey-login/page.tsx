@@ -71,7 +71,7 @@ export default function PasskeyLoginPage() {
         <div className="mb-8">
           <h1 className="text-5xl font-bold mb-4 text-foreground">Passkey Login</h1>
           <p className="text-muted-foreground text-lg">
-            Experience seamless authentication with biometric passkeys. No seed phrases,
+            Authenticate with biometric passkeys. No seed phrases,
             no extensions - just secure, passwordless authentication.
           </p>
         </div>

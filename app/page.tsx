@@ -15,7 +15,7 @@ export default function Home() {
     {
       title: "Passkey Login",
       description:
-        "Experience seamless authentication with biometric passkeys. No seed phrases, no extensions - just Face ID or Touch ID.",
+        "Authenticate with biometric passkeys. No seed phrases, no extensions - just Face ID or Touch ID.",
       href: "/passkey-login",
       badge: { label: "Core", variant: "core" as const },
       features: ["Smart wallet creation", "Session persistence", "Cross-device support"],

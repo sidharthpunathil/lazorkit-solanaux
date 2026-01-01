@@ -8,7 +8,7 @@ Built for the [Lazorkit Bounty](https://earn.superteam.fun/listing/integrate-pas
 
 ## Overview
 
-This repository provides a production-ready example of integrating Lazorkit SDK with Next.js to create a seamless Solana Web3 experience. It demonstrates:
+This repository provides a production-ready example of integrating Lazorkit SDK with Next.js to create a Solana Web3 experience. It demonstrates:
 
 - **Passkey Authentication** - No seed phrases, no browser extensions
 - **Gasless Transactions** - Send tokens without holding SOL for fees
@@ -315,7 +315,7 @@ This project was built for the **Lazorkit Bounty** by Superteam Vietnam.
 
 ## Acknowledgments
 
-- Lazorkit team for the amazing SDK
+- Lazorkit team for the SDK
 - Superteam Vietnam for organizing the bounty
 - Jupiter team for the aggregator API
 - Solana Foundation for passkey support

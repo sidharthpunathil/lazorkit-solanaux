@@ -64,7 +64,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
    - Request test SOL (usually 2 SOL per request)
 
 3. **Try the Features**
-   - **Passkey Login**: Experience seamless authentication
+   - **Passkey Login**: Use biometric authentication
    - **Gasless Transfer**: Send SOL or USDC without holding SOL for fees
    - **Token Swap**: Swap tokens using Jupiter aggregator
    - **Subscription**: Set up recurring payments

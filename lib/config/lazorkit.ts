@@ -12,7 +12,7 @@
 
 export const LAZORKIT_CONFIG = {
   // Solana RPC URL - Use Devnet by default
-  // ⚠️ Public RPC endpoints are rate-limited (429 errors are common)
+  // Note: Public RPC endpoints are rate-limited (429 errors are common)
   // For production, use your own RPC endpoint:
   // - Helius: https://www.helius.dev/
   // - QuickNode: https://www.quicknode.com/

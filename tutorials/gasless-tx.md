@@ -1,6 +1,6 @@
 # Gasless Token Transfers
 
-In this tutorial, you'll learn how to send SOL and SPL tokens (like USDC) without requiring users to hold SOL for transaction fees. This is one of Lazorkit's most powerful features for improving user experience.
+In this tutorial, you'll learn how to send SOL and SPL tokens (like USDC) without requiring users to hold SOL for transaction fees. This feature helps improve user experience.
 
 ## You will learn
 
