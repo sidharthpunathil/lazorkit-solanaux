@@ -78,10 +78,10 @@ export function TransferForm({
       <div className="mb-6">
         <h2 className="text-2xl font-semibold mb-2 text-gray-900">Transfer {type}</h2>
         <p className="text-gray-600 text-sm leading-relaxed">
-          {type === "SOL"
-            ? "Send SOL to any Solana address. The transaction fee will be sponsored by the paymaster (gasless!)."
-            : "Send USDC tokens. Transaction fees will be paid in USDC (no SOL needed!). This is perfect for users who only hold stablecoins."}
-        </p>
+        {type === "SOL"
+          ? "Send SOL to any Solana address. The transaction fee will be sponsored by the paymaster (gasless!)."
+          : "Send USDC tokens. Transaction fees will be paid in USDC (no SOL needed!). This is perfect for users who only hold stablecoins."}
+      </p>
       </div>
 
       <div className="space-y-5">

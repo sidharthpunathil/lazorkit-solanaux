@@ -21,12 +21,12 @@ export function Navigation() {
         <span>Back to Home</span>
       </Link>
       <div className="flex items-center gap-4">
-        <Link
-          href="/docs"
+      <Link
+        href="/docs"
           className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
-        >
-          Documentation
-        </Link>
+      >
+        Documentation
+      </Link>
         <NetworkSwitcher />
       </div>
     </nav>

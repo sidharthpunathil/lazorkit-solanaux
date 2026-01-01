@@ -31,6 +31,10 @@ This repository provides a production-ready example of integrating Lazorkit SDK 
    - Session persistence across devices
    - Cross-tab synchronization
 
+   ![Passkey Authentication](./assets/passkey-auth.png)
+   
+   > **📚 Detailed Documentation**: See the [Passkey Authentication Tutorial](./tutorials/passkey-wallet.md) and [VitePress Docs](/docs/tutorials/passkey-wallet) for complete implementation guide with code examples.
+
    **Message Signing with Passkeys:**
    
    Sign messages securely using your passkey without any on-chain transactions:
@@ -44,6 +48,10 @@ This repository provides a production-ready example of integrating Lazorkit SDK 
    - Pay fees in USDC instead of SOL
    - Perfect for onboarding new users
 
+   ![Gasless Transactions](./assets/gassles-txn.png)
+   
+   > **📚 Detailed Documentation**: See the [Gasless Transactions Tutorial](./tutorials/gasless-tx.md) and [VitePress Docs](/docs/tutorials/gasless-tx) for complete implementation guide with code examples.
+
 ### Advanced Features
 
 3. **Token Swap Interface**
@@ -53,11 +61,19 @@ This repository provides a production-ready example of integrating Lazorkit SDK 
    - Real-time quotes with slippage protection
    - Multi-hop swaps with automatic route optimization
 
+   ![Token Swap](./assets/token-swap.png)
+   
+   > **📚 Detailed Documentation**: See the [Token Swap Tutorial](./tutorials/token-swap.md) and [VitePress Docs](/docs/tutorials/token-swap) for complete implementation guide with code examples.
+
 4. **Subscription Service**
    - One-time approval for recurring charges
    - Automated billing without user signatures
    - Smart wallet policy delegation
    - Cancel anytime
+
+   ![Subscription Service](./assets/subscription-service.png)
+   
+   > **📚 Detailed Documentation**: See the [Subscription Service Tutorial](./tutorials/subscription.md) and [VitePress Docs](/docs/tutorials/subscription) for complete implementation guide with code examples.
 
 ## Quick Start
 

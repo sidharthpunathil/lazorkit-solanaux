@@ -23,8 +23,8 @@ import { useWalletStore, type Network } from "@/lib/store/walletStore";
 export const TOKEN_MINTS = {
   devnet: {
     SOL: "So11111111111111111111111111111111111111112", // Wrapped SOL (same on all networks)
-    USDC: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU", // Devnet USDC
-    USDT: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", // Devnet USDT
+  USDC: "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU", // Devnet USDC
+  USDT: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", // Devnet USDT
   },
   mainnet: {
     SOL: "So11111111111111111111111111111111111111112", // Wrapped SOL
@@ -109,7 +109,7 @@ export function useTokenSwap() {
       } else {
         console.warn("Jupiter API key not found. Some features may not work.");
       }
-      
+
       let response: Response;
       let timeoutId: ReturnType<typeof setTimeout> | null = null;
       try {
@@ -257,7 +257,7 @@ export function useTokenSwap() {
       } else {
         console.warn("Jupiter API key not found. Some features may not work.");
       }
-      
+
       let response: Response;
       try {
         response = await fetch(swapUrl, {

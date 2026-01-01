@@ -81,12 +81,12 @@ export function Header() {
           {/* Right side: Network Switcher and Get Started Button */}
           <div className="flex items-center gap-4">
             <NetworkSwitcher />
-            <Link
-              href="/passkey-login"
+          <Link
+            href="/passkey-login"
               className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 active:bg-purple-800 transition-colors"
-            >
-              Get Started
-            </Link>
+          >
+            Get Started
+          </Link>
           </div>
         </div>
       </div>

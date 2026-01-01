@@ -36,25 +36,25 @@ export function WalletStatus() {
           <p className="text-xs font-medium text-gray-500 mb-2.5 uppercase tracking-wide">Smart Wallet Address</p>
           <div className="flex items-center gap-2 flex-wrap">
             <code className="text-sm font-mono text-gray-900 break-all bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
-              {showFullAddress ? smartWalletAddress : `${smartWalletAddress.slice(0, 8)}...${smartWalletAddress.slice(-8)}`}
-            </code>
-            <button
-              onClick={() => setShowFullAddress(!showFullAddress)}
+                {showFullAddress ? smartWalletAddress : `${smartWalletAddress.slice(0, 8)}...${smartWalletAddress.slice(-8)}`}
+              </code>
+              <button
+                onClick={() => setShowFullAddress(!showFullAddress)}
               className="text-xs font-medium text-purple-600 hover:text-purple-700 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-purple-50"
-              title={showFullAddress ? "Show shortened" : "Show full address"}
-            >
-              {showFullAddress ? "Hide" : "Show Full"}
-            </button>
-            <button
-              onClick={copyAddress}
+                title={showFullAddress ? "Show shortened" : "Show full address"}
+              >
+                {showFullAddress ? "Hide" : "Show Full"}
+              </button>
+              <button
+                onClick={copyAddress}
               className="text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-gray-100"
-              title="Copy address"
-            >
-              Copy
-            </button>
+                title="Copy address"
+              >
+                Copy
+              </button>
+            </div>
           </div>
-        </div>
-        {balance !== null && (
+          {balance !== null && (
           <div className="flex-shrink-0">
             <p className="text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide text-right">Balance</p>
             <div className="flex items-center justify-end gap-3">
@@ -63,8 +63,8 @@ export function WalletStatus() {
               </p>
               {network === "devnet" && <FaucetButton />}
             </div>
-          </div>
-        )}
+            </div>
+          )}
       </div>
     </div>
   );

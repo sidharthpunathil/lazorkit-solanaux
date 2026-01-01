@@ -75,6 +75,17 @@ export default function PasskeyLoginPage() {
             Authenticate with biometric passkeys. No seed phrases,
             no extensions - just secure, passwordless authentication.
           </p>
+          <div className="mt-4">
+            <a
+              href="/docs/tutorials/passkey-wallet.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-purple-600 hover:text-purple-700 font-medium transition-colors"
+            >
+              <span>View detailed documentation</span>
+              <span>→</span>
+            </a>
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 mb-6">
@@ -110,44 +121,44 @@ export default function PasskeyLoginPage() {
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 mb-6">
               <h2 className="text-2xl font-semibold mb-4 text-gray-900">Sign Message</h2>
               <p className="text-gray-600 mb-6 text-sm leading-relaxed">
-                Test message signing with your passkey. This is useful for
+                  Test message signing with your passkey. This is useful for
                 authentication without sending transactions. The signature uses WebAuthn P256 curve.
-              </p>
+                </p>
 
-              <div className="space-y-5">
-                <div>
+                <div className="space-y-5">
+                  <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2.5">
-                    Message to Sign
-                  </label>
-                  <input
-                    type="text"
-                    value={messageToSign}
-                    onChange={(e) => setMessageToSign(e.target.value)}
+                      Message to Sign
+                    </label>
+                    <input
+                      type="text"
+                      value={messageToSign}
+                      onChange={(e) => setMessageToSign(e.target.value)}
                     className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder:text-gray-400 font-medium transition-all duration-200 hover:border-gray-400"
-                    placeholder="Enter message to sign"
-                  />
-                </div>
+                      placeholder="Enter message to sign"
+                    />
+                  </div>
 
-                <button
-                  onClick={handleSignMessage}
+                  <button
+                    onClick={handleSignMessage}
                   disabled={isSigning || !messageToSign || !signMessage}
                   className="w-full px-4 py-2.5 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 active:bg-purple-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  {isSigning ? "Signing..." : "Sign Message"}
-                </button>
+                  >
+                    {isSigning ? "Signing..." : "Sign Message"}
+                  </button>
 
-                {signature && (
+                  {signature && (
                   <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl">
                     <p className="text-sm font-semibold text-green-700 mb-2.5">
-                      Message Signed Successfully
-                    </p>
+                        Message Signed Successfully
+                      </p>
                     <code className="text-xs text-green-600/80 break-all font-mono whitespace-pre-wrap bg-green-50/50 p-2 rounded-lg block">
-                      {signature}
-                    </code>
-                  </div>
-                )}
+                        {signature}
+                      </code>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
 
             <InfoCard
               title="Session Persistence"

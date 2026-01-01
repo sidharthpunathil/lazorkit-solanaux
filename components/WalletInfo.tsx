@@ -94,7 +94,7 @@ export function WalletInfo() {
           {network === "mainnet" && (
             <p className="mt-2.5 text-xs text-gray-500">
               This is your Mainnet balance. Use real SOL for transactions.
-            </p>
+          </p>
           )}
         </div>
 

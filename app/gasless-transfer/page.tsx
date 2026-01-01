@@ -41,6 +41,17 @@ export default function GaslessTransferPage() {
             Send SOL or USDC without holding SOL for fees. Powered by Lazorkit's
             paymaster service.
           </p>
+          <div className="mt-4">
+            <a
+              href="/docs/tutorials/gasless-tx.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-purple-600 hover:text-purple-700 font-medium transition-colors"
+            >
+              <span>View detailed documentation</span>
+              <span>→</span>
+            </a>
+          </div>
         </div>
 
         {!isConnected ? (
